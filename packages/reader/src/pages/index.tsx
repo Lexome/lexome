@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import React, { useEffect, useMemo } from 'react'
-import { styled, Row } from '@style-kit-n/web'
+import { Row } from '@style-kit-n/web'
 
 import * as stylex from '@stylexjs/stylex';
 import {
@@ -12,7 +12,7 @@ import {
   useRightPanel
 } from '@/hooks/usePanel'
 import { BookProvider, useBook } from '@/providers/BookProvider'
-import { BUTTON_TYPE, Button } from '../components/design-system/Button/Button';
+import { BUTTON_TYPE } from '../components/design-system/Button/Button';
 
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
@@ -245,6 +245,8 @@ const ControlPanel = () => {
   const { rendition } = useBook()
   const [ panelState, setPanelState ] = useRightPanel()
 
+  console.log('here!')
+
   return (
     <div
       style={{
@@ -307,8 +309,10 @@ export default function Home() {
       <main>
         <DynamicContent>
           <BookProvider>
-            <Reader />
-            <ControlPanel />
+            <div>
+              <Reader />
+              <ControlPanel />
+            </div>
           </BookProvider>
         </DynamicContent>
       </main>

@@ -14,7 +14,7 @@
     "@mui/icons-material": "^5.15.2",
     "@mui/material": "^5.15.2",
     "@stylexjs/stylex": "^0.4.1",
-    "@style-kit-n/web": "0.9.0",
+    "@style-kit-n/web": "0.21.0",
 
     "next": "14.0.4",
     "react": "^18",
