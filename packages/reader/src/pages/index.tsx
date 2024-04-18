@@ -12,11 +12,12 @@ import {
   useRightPanel
 } from '@/hooks/usePanel'
 import { BookProvider, useBook } from '@/providers/BookProvider'
-import { BUTTON_TYPE } from '../components/design-system/Button/Button';
+import { Button, BUTTON_TYPE } from '../components/design-system/Button';
 
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import { DynamicContent } from '@/components/DynamicContent';
+import { styled } from '@/theme';
 
 // const slideIn = stylex.keyframes({
 //   '0%': {transform: 'translateX(0%)'},
@@ -27,6 +28,21 @@ import { DynamicContent } from '@/components/DynamicContent';
 //   '0%': {transform: 'translateX(-500px)'},
 //   '100%': {transform: 'translateX(-100%)'},
 // });
+
+const ReaderWrapper = styled<{
+  wrapperWidth: string
+}>(
+  'div',
+  ({ wrapperWidth }) => ({
+    styles: {
+      display: 'flex',
+      height: 'calc(100vh - 60px)',
+      justifyContent: 'center',
+      overflowY: 'auto',
+      width: wrapperWidth
+    }
+  })
+)
 
 const LeftPanel = styled(
   'div',
@@ -63,35 +79,35 @@ const RightPanel = styled<{
     }
   })
 
-const styles = stylex.create({
-  readerWrapperWidth: (width: number) => ({
-    width: `${width}px`
-  }),
-  closeDrawerBar: {
-    height: '100%',
-    width: '40px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  panel: {
-    position: 'fixed',
-    backgroundColor: '#fafafa',
-    height: 'calc(100vh)',
-    boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.2)',
-    top: 0,
-    left: '100%',
-    zIndex: 1
-  },
-  rightPanelWidth: (rightPanelWidth: number) => ({
-    width: `${rightPanelWidth}px`
-  }),
-  readerWrapper: {
-    display: 'flex',
-    height: 'calc(100vh - 60px)',
-    justifyContent: 'center',
-    overflowY: 'auto'
-  }
-});
+// const styles = stylex.create({
+//   readerWrapperWidth: (width: number) => ({
+//     width: `${width}px`
+//   }),
+//   closeDrawerBar: {
+//     height: '100%',
+//     width: '40px',
+//     display: 'flex',
+//     alignItems: 'center',
+//   },
+//   panel: {
+//     position: 'fixed',
+//     backgroundColor: '#fafafa',
+//     height: 'calc(100vh)',
+//     boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.2)',
+//     top: 0,
+//     left: '100%',
+//     zIndex: 1
+//   },
+//   rightPanelWidth: (rightPanelWidth: number) => ({
+//     width: `${rightPanelWidth}px`
+//   }),
+//   readerWrapper: {
+//     display: 'flex',
+//     height: 'calc(100vh - 60px)',
+//     justifyContent: 'center',
+//     overflowY: 'auto'
+//   }
+// });
 
 // const ReaderWrapper = styled<{
 //   leftPanelState: LEFT_PANEL_STATE,
@@ -165,9 +181,15 @@ const Reader = () => {
   const lastRightPanelState = React.useRef(rightPanelState)
   const lastLeftPanelState = React.useRef(leftPanelState)
 
-  useEffect(() => {
-    
-  })
+  const rightPanelPx = useMemo(() => {
+    if (typeof window === 'undefined') return 0
+
+    return getRightPanelPx({
+      rightPanelState,
+      leftPanelState,
+      windowWidth: window.innerWidth
+    })
+  }, [rightPanelState, leftPanelState])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -180,8 +202,8 @@ const Reader = () => {
       rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED
     ) {
       el.animate([
-        { transform: "translateX(0)" },
-        { transform: "translateX(-100%)" }
+        { transform: "translateX(-48px)" },
+        { transform: `translateX(-${rightPanelPx}px)` }
       ], {
         duration: 200,
         fill: 'forwards'
@@ -192,8 +214,8 @@ const Reader = () => {
     ) {
 
       el.animate([
-        { transform: "translateX(-100%)" },
-        { transform: "translateX(0)" }
+        { transform: `translateX(-${rightPanelPx}px)` },
+        { transform: "translateX(-48px)" }
       ], {
         duration: 200,
         fill: 'forwards'
@@ -202,16 +224,6 @@ const Reader = () => {
 
     lastRightPanelState.current = rightPanelState
   }, [rightPanelState])
-
-  const rightPanelPx = useMemo(() => {
-    if (typeof window === 'undefined') return 0
-
-    return getRightPanelPx({
-      rightPanelState,
-      leftPanelState,
-      windowWidth: window.innerWidth
-    })
-  }, [rightPanelState, leftPanelState])
 
   const readerWidth = useMemo(() => {
     if (typeof window === 'undefined') return 0
@@ -226,14 +238,9 @@ const Reader = () => {
   return (
     <Row>
       <LeftPanel id='left-panel' />
-      <div
-        {...stylex.props(
-          styles.readerWrapper,
-          styles.readerWrapperWidth(readerWidth)
-        )}
-      >
+      <ReaderWrapper wrapperWidth={`${readerWidth}px`}>
         <div id="lexome_reader" />
-      </div>
+      </ReaderWrapper>
       <RightPanel id='right-panel' panelWidth={rightPanelPx}>
         {rightPanelPx}
       </RightPanel>
@@ -244,8 +251,6 @@ const Reader = () => {
 const ControlPanel = () => {
   const { rendition } = useBook()
   const [ panelState, setPanelState ] = useRightPanel()
-
-  console.log('here!')
 
   return (
     <div
@@ -262,6 +267,7 @@ const ControlPanel = () => {
       >
         <Button
           onClick={() => {
+            console.log("here!!! prev")
             rendition?.prev()
           }}
           label="Previous"
