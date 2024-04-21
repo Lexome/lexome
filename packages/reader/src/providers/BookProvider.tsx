@@ -27,7 +27,8 @@ const getReaderDimensions = (params: {
 
   const panelWidth = getRightPanelWidth({
     windowWidth: width,
-    state: panelState,
+    rightPanalState: panelState,
+    leftPanelState: p
   })
 
   return {
@@ -47,7 +48,8 @@ const debounce = (func: Function, wait: number) => {
 
 export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [book, setBook] = useState<Book | undefined>()
-  const [panelState, setPanelState] = useRightPanel()
+  const [rightPanelState, setRightPanelState] = useRightPanel()
+  const [leftPanelState, setLeftPanelState] = useRightPanel()
   const [rendition, setRendition] = useState<Rendition | undefined>()
 
   const [selectedRange, setSelectedRange] = useState<string | undefined>()
@@ -56,7 +58,7 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const highlights = useRef<any[]>([])
 
   const debouncedSetPanelState = useRef(
-    debounce(setPanelState, 1000)
+    debounce(setRightPanelState, 1000)
   ).current
 
   useEffect(() => {
@@ -66,7 +68,8 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     if (typeof window === 'undefined') return
 
     const readerDimensions = getReaderDimensions({
-      panelState
+      :,
+
     })
 
     const rendition = book.renderTo('lexome_reader', {
