@@ -1,6 +1,6 @@
-import { RIGHT_PANEL_STATE, getRightPanelWidth, useRightPanel } from "@/hooks/usePanel"
+import { LEFT_PANEL_STATE, RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } from "@/hooks/usePanel"
 import ePub, { Book, Rendition } from 'epubjs'
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 
 const BookContext = createContext<{
   book?: Book,
@@ -12,9 +12,10 @@ const BookContext = createContext<{
   setRendition: () => {}
 })
 
-const getReaderDimensions = (params: {
-  panelState: RIGHT_PANEL_STATE,
-}) => {
+const useReaderDimensions = () => {
+  const [rightPanelState] = useRightPanel()
+  const [leftPanelState] = useLeftPanel()
+
   if (typeof window === 'undefined') return {
     width: 0,
     height: 0
@@ -23,18 +24,16 @@ const getReaderDimensions = (params: {
   const width = window.innerWidth
   const height = window.innerHeight
 
-  const { panelState } = params
-
   const panelWidth = getRightPanelWidth({
     windowWidth: width,
-    rightPanalState: panelState,
-    leftPanelState: p
+    rightPanelState,
+    leftPanelState
   })
 
-  return {
+  return useMemo(() => ({
     width: Math.min(width - (panelWidth as number), 700),
     height: height - 60,
-  }
+  }), [rightPanelState, leftPanelState])
 }
 
 const debounce = (func: Function, wait: number) => {
@@ -48,12 +47,13 @@ const debounce = (func: Function, wait: number) => {
 
 export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [book, setBook] = useState<Book | undefined>()
-  const [rightPanelState, setRightPanelState] = useRightPanel()
-  const [leftPanelState, setLeftPanelState] = useRightPanel()
+  const [_, setRightPanelState] = useRightPanel()
   const [rendition, setRendition] = useState<Rendition | undefined>()
 
-  const [selectedRange, setSelectedRange] = useState<string | undefined>()
-  const [selectedParagraph, setSelectedParagraph] = useState<string | undefined>()
+  // const [selectedRange, setSelectedRange] = useState<string | undefined>()
+  // const [selectedParagraph, setSelectedParagraph] = useState<string | undefined>()
+
+  const readerDimensions = useReaderDimensions()
 
   const highlights = useRef<any[]>([])
 
@@ -66,11 +66,6 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     const book = ePub("https://s3.amazonaws.com/moby-dick/OPS/package.opf"); 
 
     if (typeof window === 'undefined') return
-
-    const readerDimensions = getReaderDimensions({
-      :,
-
-    })
 
     const rendition = book.renderTo('lexome_reader', {
       ...readerDimensions,
@@ -100,9 +95,6 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       debouncedSetPanelState(RIGHT_PANEL_STATE.PARTIALLY_EXPANDED)
 
       highlights.current = [cfiRange]
-      // rendition.annotations.add('test', cfiRange)
-      // contents.window.getSelection().removeAllRanges();
-
     });
 
     setBook(book)
@@ -112,14 +104,10 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const readerDimensions = getReaderDimensions({
-      panelState
-    })
-
     if (rendition) {
       rendition.resize(readerDimensions.width, readerDimensions.height)
     }
-  }, [panelState])
+  }, [readerDimensions])
 
   return (
     <BookContext.Provider value={{

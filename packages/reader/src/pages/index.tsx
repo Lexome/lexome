@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Row } from '@style-kit-n/web'
 
 import * as stylex from '@stylexjs/stylex';
@@ -18,6 +18,8 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import { DynamicContent } from '@/components/DynamicContent';
 import { styled } from '@/theme';
+import { animated, useSpring } from '@react-spring/web';
+import { useDrag } from '@use-gesture/react';
 
 // const slideIn = stylex.keyframes({
 //   '0%': {transform: 'translateX(0%)'},
@@ -44,106 +46,86 @@ const ReaderWrapper = styled<{
   })
 )
 
-const LeftPanel = styled(
+// Wrapper for touch action target for left and right panels
+// Contains some padding to allow for easier touch target
+const PanelTouchContainer = styled(
   'div',
   {
     styles: {
       position: 'fixed',
-      backgroundColor: '#fafafa',
-      height: 'calc(100vh)',
-      boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.2)',
+      backgroundColor: 'transparent',
+      flexDirection: 'row',
       top: 0,
+      display: 'flex',
+      height: '100vh',
+    }
+  }
+
+)
+
+const Panel = styled(
+  'div',
+  {
+    styles: {
+      backgroundColor: '#f5f5f5',
+      height: '100vh',
+      boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.1)',
+      display: 'flex',
+      flexDirection: 'row'
+    }
+  }
+)
+
+const LeftPanelTouchContainer = styled(
+  PanelTouchContainer,
+  {
+    styles: {
       right: '100%',
       width: '300px'
     }
   }
 )
 
-const RightPanel = styled<{
-  panelWidth: number
-}>(
-  'div',
-  ({
-    panelWidth
-  }) => {
-    return {
+const LeftPanel = styled(
+  Panel,
+  {
+    styles: {
+      right: '100%',
+      width: '300px'
+    }
+  }
+)
+
+const RightPanelTouchContainer = 
+  styled<{
+    panelWidth: number
+  }>(
+    'div',
+    ({ panelWidth }) => ({
       styles: {
-        position: 'fixed',
-        backgroundColor: '#fafafa',
-        height: 'calc(100vh)',
-        boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.2)',
-        top: 0,
-        left: '100%',
-        width: `${panelWidth}px`
+        width: `${panelWidth + 32}px`
+      }
+    })
+  )
+
+const RightPanel =
+  styled<{
+    panelWidth: number
+  }>(
+    Panel,
+    ({
+      panelWidth
+    }) => {
+      return {
+        styles: {
+          left: '100%',
+          transform: 'translateX(-48px)',
+          width: `${panelWidth}px`,
+          touchAction: 'none'
+        }
       }
     }
-  })
-
-// const styles = stylex.create({
-//   readerWrapperWidth: (width: number) => ({
-//     width: `${width}px`
-//   }),
-//   closeDrawerBar: {
-//     height: '100%',
-//     width: '40px',
-//     display: 'flex',
-//     alignItems: 'center',
-//   },
-//   panel: {
-//     position: 'fixed',
-//     backgroundColor: '#fafafa',
-//     height: 'calc(100vh)',
-//     boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.2)',
-//     top: 0,
-//     left: '100%',
-//     zIndex: 1
-//   },
-//   rightPanelWidth: (rightPanelWidth: number) => ({
-//     width: `${rightPanelWidth}px`
-//   }),
-//   readerWrapper: {
-//     display: 'flex',
-//     height: 'calc(100vh - 60px)',
-//     justifyContent: 'center',
-//     overflowY: 'auto'
-//   }
-// });
-
-// const ReaderWrapper = styled<{
-//   leftPanelState: LEFT_PANEL_STATE,
-//   rightPanelState: RIGHT_PANEL_STATE,
-//   windowWidth: number
-// }>('div', ({ leftPanelState, rightPanelState, windowWidth }) => {
-//   const rightPanelWidth = getRightPanelWidth({
-//     state: rightPanelState,
-//     windowWidth: 500
-//   })
-
-//   let width = '0px'
-
-//   if (
-//     leftPanelState === LEFT_PANEL_STATE.CLOSED &&
-//     rightPanelState === RIGHT_PANEL_STATE.CLOSED   
-//   ) {
-//     width = '100vw'
-//   } else if (
-//     leftPanelState === LEFT_PANEL_STATE.EXPANDED &&
-//     rightPanelState === RIGHT_PANEL_STATE.CLOSED
-//   ) {
-//     width = `calc(100vw - 4
-//   }
-//   )
-
-//   return {
-//     styles: {
-
-//       display: 'flex',
-//       height: 'calc(100vh - 60px)',
-//       justifyContent: 'center',
-//       overflowY: 'auto'
-//     }
-//   }
-// })
+  )
 
 const getReaderWidth = (params: {
   leftPanelState: LEFT_PANEL_STATE,
@@ -174,6 +156,11 @@ const getReaderWidth = (params: {
   return width
 }
 
+enum PANEL_ID {
+  RIGHT='right-panel',
+  LEFT='left-panel'
+}
+
 const Reader = () => {
   const [rightPanelState] = useRightPanel()
   const [leftPanelState] = useLeftPanel()
@@ -191,6 +178,36 @@ const Reader = () => {
     })
   }, [rightPanelState, leftPanelState])
 
+  const panelAnimationState = useRef({
+    [PANEL_ID.RIGHT]: -48,
+    [PANEL_ID.LEFT]: 0
+  })
+
+  const lastDragStartRef = useRef<number | undefined>(undefined)
+
+  const animateSlide = (params: {
+    panelId: PANEL_ID,
+    to: number,
+  }) => {
+    if (params.panelId === PANEL_ID.RIGHT) {
+      const el = window.document.getElementById(params.panelId)
+
+      if (el) {
+        const lastState = panelAnimationState.current[params.panelId]
+
+        el.animate([
+          { transform: `translateX(${lastState}px)` },
+          { transform: `translateX(${params.to}px)` }
+        ], {
+          duration: 100,
+          fill: 'forwards'
+        })
+
+        panelAnimationState.current[params.panelId] = params.to
+      }
+    }
+  }
+
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!window.document.getElementById("right-panel")) return
@@ -201,30 +218,63 @@ const Reader = () => {
       lastRightPanelState.current === RIGHT_PANEL_STATE.CLOSED &&
       rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED
     ) {
-      el.animate([
-        { transform: "translateX(-48px)" },
-        { transform: `translateX(-${rightPanelPx}px)` }
-      ], {
-        duration: 200,
-        fill: 'forwards'
-      })
+      // el.animate([
+      //   { transform: "translateX(-48px)" },
+      //   { transform: `translateX(-${rightPanelPx}px)` }
+      // ], {
+      //   duration: 200,
+      //   fill: 'forwards'
+      // })
     } else if (
       lastRightPanelState.current === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED &&
       rightPanelState === RIGHT_PANEL_STATE.CLOSED
     ) {
 
-      el.animate([
-        { transform: `translateX(-${rightPanelPx}px)` },
-        { transform: "translateX(-48px)" }
-      ], {
-        duration: 200,
-        fill: 'forwards'
-      })
+      // el.animate([
+      //   { transform: `translateX(-${rightPanelPx}px)` },
+      //   { transform: "translateX(-48px)" }
+      // ], {
+      //   duration: 200,
+      //   fill: 'forwards'
+      // })
     }
 
     lastRightPanelState.current = rightPanelState
   }, [rightPanelState])
 
+  // Set the drag hook and define component movement based on gesture data.
+  const getRightSliderProps = useDrag(({ down, movement: [mx, my] }) => {
+    const reachedThreshold = Math.abs(mx) > 100
+
+    let releaseDestination = -48
+
+    if (reachedThreshold && mx > 0) {
+      releaseDestination = -48
+    } else if (reachedThreshold && mx < 0) {
+      releaseDestination = -500
+    }
+
+    if (lastDragStartRef.current === undefined) {
+      lastDragStartRef.current = panelAnimationState.current[PANEL_ID.RIGHT]
+    }
+
+    const lastDragStart = lastDragStartRef.current
+
+    const animateTo = down ? Math.max(lastDragStart + mx, -500) : releaseDestination
+    
+    animateSlide({
+      panelId: PANEL_ID.RIGHT,
+      to: animateTo,
+    })
+
+    if (!down) {
+      lastDragStartRef.current = undefined
+    }
+
+    // api.start({ x: down ? mx : 0, y: down ? my : 0 })
+  })
+
+  // Bind it to a component.
   const readerWidth = useMemo(() => {
     if (typeof window === 'undefined') return 0
 
@@ -241,8 +291,8 @@ const Reader = () => {
       <ReaderWrapper wrapperWidth={`${readerWidth}px`}>
         <div id="lexome_reader" />
       </ReaderWrapper>
-      <RightPanel id='right-panel' panelWidth={rightPanelPx}>
-        {rightPanelPx}
+      <RightPanel id='right-panel' panelWidth={rightPanelPx} {...getRightSliderProps()}>
+        Hello world
       </RightPanel>
     </Row>
   )

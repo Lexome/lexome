@@ -13,9 +13,10 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.2",
     "@mui/material": "^5.15.2",
+    "@react-spring/web": "^9.7.3",
+    "@style-kit-n/web": "0.23.0",
     "@stylexjs/stylex": "^0.4.1",
-    "@style-kit-n/web": "0.22.0",
-
+    "@use-gesture/react": "^10.3.1",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18"
