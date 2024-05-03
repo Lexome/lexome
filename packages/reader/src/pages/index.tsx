@@ -31,6 +31,11 @@ import { useDrag } from '@use-gesture/react';
 //   '100%': {transform: 'translateX(-100%)'},
 // });
 
+const RIGHT_LIP_WIDTH = 48
+const LEFT_LIP_WIDTH = 48
+const RIGHT_DRAG_TARGET_BUFFER = 48
+const LEFT_DRAG_TARGET_BUFFER = 48
+
 const ReaderWrapper = styled<{
   wrapperWidth: string
 }>(
@@ -58,9 +63,9 @@ const PanelTouchContainer = styled(
       top: 0,
       display: 'flex',
       height: '100vh',
+      zIndex: 1
     }
   }
-
 )
 
 const Panel = styled(
@@ -71,61 +76,63 @@ const Panel = styled(
       height: '100vh',
       boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.1)',
       display: 'flex',
-      flexDirection: 'row'
+      flexDirection: 'row',
     }
   }
 )
 
-const LeftPanelTouchContainer = styled(
+const LeftPanelTouchContainer = styled<{
+  panelWidth: number
+}>(
   PanelTouchContainer,
-  {
+  ({ panelWidth }) => ({
+    pr: 2,
     styles: {
       right: '100%',
-      width: '300px'
+      width: `${panelWidth + LEFT_DRAG_TARGET_BUFFER}px`,
+      paddingRight: `${RIGHT_DRAG_TARGET_BUFFER}px`,
+      transform: `translateX(${LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH}px)`,
+      touchAction: 'none'
     }
-  }
+  })
 )
 
-const LeftPanel = styled(
+const LeftPanel = styled<{
+  panelWidth: number
+}>(
   Panel,
-  {
+  ({ panelWidth }) => ({
     styles: {
-      right: '100%',
-      width: '300px'
+      width: `${panelWidth}px`,
     }
-  }
+  })
 )
 
-const RightPanelTouchContainer = 
-  styled<{
-    panelWidth: number
-  }>(
-    'div',
-    ({ panelWidth }) => ({
-      styles: {
-        width: `${panelWidth + 32}px`
-      }
-    })
-  )
-
-const RightPanel =
-  styled<{
-    panelWidth: number
-  }>(
-    Panel,
-    ({
-      panelWidth
-    }) => {
-      return {
-        styles: {
-          left: '100%',
-          transform: 'translateX(-48px)',
-          width: `${panelWidth}px`,
-          touchAction: 'none'
-        }
-      }
+const RightPanelTouchContainer = styled<{
+  panelWidth: number
+}>(
+  PanelTouchContainer,
+  ({ panelWidth }) => ({
+    styles: {
+      width: `${panelWidth + RIGHT_DRAG_TARGET_BUFFER}px`,
+      paddingLeft: `${RIGHT_DRAG_TARGET_BUFFER}px`,
+      left: '100%',
+      transform: `translateX(-${RIGHT_DRAG_TARGET_BUFFER + RIGHT_LIP_WIDTH}px)`,
+      touchAction: 'none'
     }
-  )
+  })
+)
+
+const RightPanel = styled<{
+  panelWidth: number
+}>(
+  Panel,
+  ({ panelWidth }) => ({
+    styles: {
+      width: `${panelWidth}px`,
+    }
+  })
+)
 
 const getReaderWidth = (params: {
   leftPanelState: LEFT_PANEL_STATE,
@@ -133,12 +140,6 @@ const getReaderWidth = (params: {
   windowWidth: number,
 }) => {
   let width: number = params.windowWidth
-
-  if (
-    params.leftPanelState === LEFT_PANEL_STATE.EXPANDED
-  ) {
-    width -= 300
-  }
 
   if (
     params.rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED ||
@@ -162,11 +163,8 @@ enum PANEL_ID {
 }
 
 const Reader = () => {
-  const [rightPanelState] = useRightPanel()
-  const [leftPanelState] = useLeftPanel()
-
-  const lastRightPanelState = React.useRef(rightPanelState)
-  const lastLeftPanelState = React.useRef(leftPanelState)
+  const [rightPanelState, setRightPanelState] = useRightPanel()
+  const [leftPanelState, setLeftPanelState] = useLeftPanel()
 
   const rightPanelPx = useMemo(() => {
     if (typeof window === 'undefined') return 0
@@ -179,96 +177,139 @@ const Reader = () => {
   }, [rightPanelState, leftPanelState])
 
   const panelAnimationState = useRef({
-    [PANEL_ID.RIGHT]: -48,
-    [PANEL_ID.LEFT]: 0
+    [PANEL_ID.RIGHT]: 0 - RIGHT_DRAG_TARGET_BUFFER - RIGHT_LIP_WIDTH,
+    [PANEL_ID.LEFT]: LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH
   })
 
-  const lastDragStartRef = useRef<number | undefined>(undefined)
+
+  const lastRightDragStartRef = useRef<number | undefined>(undefined)
+  const lastLeftDragStartRef = useRef<number | undefined>(undefined)
 
   const animateSlide = (params: {
     panelId: PANEL_ID,
     to: number,
   }) => {
-    if (params.panelId === PANEL_ID.RIGHT) {
-      const el = window.document.getElementById(params.panelId)
+    const el = window.document.getElementById(params.panelId)
 
-      if (el) {
-        const lastState = panelAnimationState.current[params.panelId]
+    if (el) {
+      const lastState = panelAnimationState.current[params.panelId]
 
-        el.animate([
-          { transform: `translateX(${lastState}px)` },
-          { transform: `translateX(${params.to}px)` }
-        ], {
-          duration: 100,
-          fill: 'forwards'
-        })
+      el.animate([
+        { transform: `translateX(${lastState}px)` },
+        { transform: `translateX(${params.to}px)` }
+      ], {
+        duration: 100,
+        fill: 'forwards'
+      })
 
-        panelAnimationState.current[params.panelId] = params.to
-      }
+      panelAnimationState.current[params.panelId] = params.to
     }
   }
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!window.document.getElementById("right-panel")) return
-
-    const el = window.document.getElementById("right-panel")!
-
-    if (
-      lastRightPanelState.current === RIGHT_PANEL_STATE.CLOSED &&
-      rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED
-    ) {
-      // el.animate([
-      //   { transform: "translateX(-48px)" },
-      //   { transform: `translateX(-${rightPanelPx}px)` }
-      // ], {
-      //   duration: 200,
-      //   fill: 'forwards'
-      // })
-    } else if (
-      lastRightPanelState.current === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED &&
-      rightPanelState === RIGHT_PANEL_STATE.CLOSED
-    ) {
-
-      // el.animate([
-      //   { transform: `translateX(-${rightPanelPx}px)` },
-      //   { transform: "translateX(-48px)" }
-      // ], {
-      //   duration: 200,
-      //   fill: 'forwards'
-      // })
+    if (rightPanelState === RIGHT_PANEL_STATE.CLOSED) {
+      animateSlide({
+        panelId: PANEL_ID.RIGHT,
+        to: 0 - RIGHT_DRAG_TARGET_BUFFER - RIGHT_LIP_WIDTH
+      })
     }
 
-    lastRightPanelState.current = rightPanelState
+    if (rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED) {
+      animateSlide({
+        panelId: PANEL_ID.RIGHT,
+        to: -500
+      })
+    }
   }, [rightPanelState])
 
-  // Set the drag hook and define component movement based on gesture data.
-  const getRightSliderProps = useDrag(({ down, movement: [mx, my] }) => {
+  useEffect(() => {
+    if (leftPanelState === LEFT_PANEL_STATE.CLOSED) {
+      animateSlide({
+        panelId: PANEL_ID.LEFT,
+        to: LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH
+      })
+    }
+
+    if (leftPanelState === LEFT_PANEL_STATE.EXPANDED) {
+      animateSlide({
+        panelId: PANEL_ID.LEFT,
+        to: 300
+      })
+    }
+  }, [leftPanelState])
+
+  const getLeftSliderProps = useDrag(({ down, movement: [mx] }) => {
     const reachedThreshold = Math.abs(mx) > 100
 
-    let releaseDestination = -48
-
-    if (reachedThreshold && mx > 0) {
-      releaseDestination = -48
-    } else if (reachedThreshold && mx < 0) {
-      releaseDestination = -500
+    if (lastLeftDragStartRef.current === undefined) {
+      lastLeftDragStartRef.current = panelAnimationState.current[PANEL_ID.LEFT]
     }
 
-    if (lastDragStartRef.current === undefined) {
-      lastDragStartRef.current = panelAnimationState.current[PANEL_ID.RIGHT]
+    const lastDragStart = lastLeftDragStartRef.current
+
+    if (down) {
+      animateSlide({
+        panelId: PANEL_ID.LEFT,
+        to: Math.min(lastDragStart + mx, 300)
+      })
     }
-
-    const lastDragStart = lastDragStartRef.current
-
-    const animateTo = down ? Math.max(lastDragStart + mx, -500) : releaseDestination
-    
-    animateSlide({
-      panelId: PANEL_ID.RIGHT,
-      to: animateTo,
-    })
 
     if (!down) {
-      lastDragStartRef.current = undefined
+      lastLeftDragStartRef.current = undefined
+
+      if (reachedThreshold && mx > 0) {
+        setLeftPanelState(LEFT_PANEL_STATE.EXPANDED)
+      } else if (reachedThreshold && mx < 0) {
+        setLeftPanelState(LEFT_PANEL_STATE.CLOSED)
+      } else if (leftPanelState === LEFT_PANEL_STATE.EXPANDED) {
+        animateSlide({
+          panelId: PANEL_ID.LEFT,
+          to: 300
+        })
+      } else if (leftPanelState === LEFT_PANEL_STATE.CLOSED) {
+        animateSlide({
+          panelId: PANEL_ID.LEFT,
+          to: LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH
+        })
+      }
+    }
+  })
+
+  // Set the drag hook and define component movement based on gesture data.
+  const getRightSliderProps = useDrag(({ down, movement: [mx] }) => {
+    const reachedThreshold = Math.abs(mx) > 100
+
+    if (lastRightDragStartRef.current === undefined) {
+      lastRightDragStartRef.current = panelAnimationState.current[PANEL_ID.RIGHT]
+    }
+
+    const lastDragStart = lastRightDragStartRef.current
+
+    if (down) {
+      animateSlide({
+        panelId: PANEL_ID.RIGHT,
+        to: Math.max(lastDragStart + mx, -500),
+      })
+    }
+
+    if (!down) {
+      lastRightDragStartRef.current = undefined
+
+      if (reachedThreshold && mx > 0) {
+        setRightPanelState(RIGHT_PANEL_STATE.CLOSED)
+      } else if (reachedThreshold && mx < 0) {
+        setRightPanelState(RIGHT_PANEL_STATE.PARTIALLY_EXPANDED)
+      } else if (rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED) {
+        animateSlide({
+          panelId: PANEL_ID.RIGHT,
+          to: -500
+        })
+      } else if (rightPanelState === RIGHT_PANEL_STATE.CLOSED) {
+        animateSlide({
+          panelId: PANEL_ID.RIGHT,
+          to: 0 - RIGHT_DRAG_TARGET_BUFFER - RIGHT_LIP_WIDTH
+        })
+      }
     }
 
     // api.start({ x: down ? mx : 0, y: down ? my : 0 })
@@ -286,17 +327,47 @@ const Reader = () => {
   }, [rightPanelState, leftPanelState])
 
   return (
-    <Row>
-      <LeftPanel id='left-panel' />
-      <ReaderWrapper wrapperWidth={`${readerWidth}px`}>
-        <div id="lexome_reader" />
-      </ReaderWrapper>
-      <RightPanel id='right-panel' panelWidth={rightPanelPx} {...getRightSliderProps()}>
-        Hello world
-      </RightPanel>
-    </Row>
+    <ReaderContainer>
+      <Row>
+        <LeftPanelTouchContainer
+          id='left-panel'
+          panelWidth={300}
+          {...getLeftSliderProps()}
+        >
+          <LeftPanel id='left-panel' panelWidth={300} />
+        </LeftPanelTouchContainer>
+
+        <ReaderWrapper wrapperWidth={`${readerWidth}px`}>
+          <div id="lexome_reader" />
+        </ReaderWrapper>
+
+        <RightPanelTouchContainer
+          id="right-panel"
+          panelWidth={rightPanelPx}
+          {...getRightSliderProps()}
+        >
+          <RightPanel panelWidth={rightPanelPx}>
+            Hello world
+          </RightPanel>
+        </RightPanelTouchContainer>
+      </Row>
+      <ControlPanel />
+    </ReaderContainer>
   )
 }
+
+const ReaderContainer = styled(
+  'div',
+  {
+    styles: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      width: '100vw',
+      position: 'relative'
+    }
+  }
+)
 
 const ControlPanel = () => {
   const { rendition } = useBook()
@@ -305,53 +376,60 @@ const ControlPanel = () => {
   return (
     <div
       style={{
+        display: 'flex',
         justifyContent: 'center',
-        width: '100vw'
+        width: '100vw',
+        position: 'absolute',
+        bottom: 0,
+        height: '60px'
       }}
     >
-      <div
-        className='flex'
-        style={{
-          width: '500px'
+      <Button
+        onClick={() => {
+          console.log("here!!! prev")
+          rendition?.prev()
         }}
-      >
-        <Button
-          onClick={() => {
-            console.log("here!!! prev")
-            rendition?.prev()
-          }}
-          label="Previous"
-          type={BUTTON_TYPE.TEXT}
-          leftIcon={ArrowBackIos}
-        />
-        <Button
-          onClick={() => {
-            if (
-              panelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED
-            ) {
-              setPanelState(RIGHT_PANEL_STATE.CLOSED)
-              // setPanelState(PANEL_STATE.FULLY_EXPANDED)
-            // } else if (panelState === PANEL_STATE.FULLY_EXPANDED) {
-              // setPanelState(PANEL_STATE.CLOSED)
-            } else {
-              // setPanelState(PANEL_STATE.CLOSED)
-              setPanelState(RIGHT_PANEL_STATE.PARTIALLY_EXPANDED)
-            }
-          }}
-          label="Test"
-        />
-        <Button
-          label="Next"
-          type={BUTTON_TYPE.TEXT}
-          rightIcon={ArrowForwardIosIcon}
-          onClick={() => {
-            rendition?.next()
-          }}
-        />
-      </div>
+        label="Previous"
+        type={BUTTON_TYPE.TEXT}
+        leftIcon={ArrowBackIos}
+      />
+      <Button
+        onClick={() => {
+          if (
+            panelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED
+          ) {
+            setPanelState(RIGHT_PANEL_STATE.CLOSED)
+            // setPanelState(PANEL_STATE.FULLY_EXPANDED)
+          // } else if (panelState === PANEL_STATE.FULLY_EXPANDED) {
+            // setPanelState(PANEL_STATE.CLOSED)
+          } else {
+            // setPanelState(PANEL_STATE.CLOSED)
+            setPanelState(RIGHT_PANEL_STATE.PARTIALLY_EXPANDED)
+          }
+        }}
+        label="Test"
+      />
+      <Button
+        label="Next"
+        type={BUTTON_TYPE.TEXT}
+        rightIcon={ArrowForwardIosIcon}
+        onClick={() => {
+          rendition?.next()
+        }}
+      />
     </div>
   )
 }
+
+const PageWrapper = styled('main', {
+  styles: {
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    height: '100vh',
+    width: '100vw'
+  }
+})
 
 export default function Home() {
   return (
@@ -365,10 +443,7 @@ export default function Home() {
       <main>
         <DynamicContent>
           <BookProvider>
-            <div>
-              <Reader />
-              <ControlPanel />
-            </div>
+            <Reader />
           </BookProvider>
         </DynamicContent>
       </main>
