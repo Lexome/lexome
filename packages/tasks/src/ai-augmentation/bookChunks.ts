@@ -9,7 +9,7 @@ const defaultIsChunkBreak = (line: string) => {
 
 export const getBookChunks = (params: {
   bookLines: string[],
-  isChunkBreak?: (line: string) => boolean
+  isChunkBreak?: (line: string) => boolean,
 }) => {
   const {
     bookLines,
@@ -34,7 +34,6 @@ export const getBookChunks = (params: {
   return chunks
 }
 
-
 export const parseBookIntoChunks = (
   bookContents: string,
 ) => {
@@ -47,33 +46,34 @@ export const parseBookIntoChunks = (
   return chunks
 }
 
-export type ProcessChunk<ResponseType = any> = (params: {
+export type ProcessChunk<
+  ResponseType = any,
+> = (params: {
   chunk: string,
-  allChunks: string[],
-  lastResponse: ResponseType | null,
+  aggregatedResponse: ResponseType | null
 }) => ResponseType
 
-export const processBook = (params: {
+
+export function processBook<ResponseType = any>(params: {
   getBookContents: () => string,
-  processChunk: ProcessChunk
-}) => {
+  processChunk: ProcessChunk<ResponseType>,
+}) {
   const {
     getBookContents,
-    processChunk
+    processChunk,
   } = params
 
   const bookContents = getBookContents()
   const chunks = parseBookIntoChunks(bookContents)
 
-  let lastResponse = null
+  let aggregatedResponse = null
 
   for (const chunk of chunks) {
-    lastResponse = processChunk({
+    aggregatedResponse = processChunk({
       chunk,
-      allChunks: chunks,
-      lastResponse
+      aggregatedResponse
     })
   }
 
-  return lastResponse
+  return aggregatedResponse
 }

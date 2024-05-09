@@ -5,10 +5,13 @@ type CharacterNode = {
   name: string
 }
 
+type CharacteristicType = 'APPEARANCE' | 'PERSONALITY' | 'NAMES'
+
 type CharacteristicNode = {
   id: string,
   characterId: string,
-  info: string
+  info: string,
+  characteristicType?: CharacteristicType,
 }
 
 type RelationshipNode = {
@@ -48,7 +51,6 @@ const generatePrompt = (params: {
      You have not yet started building a new character graph yet. Any characters, characteristics, and relationships
      you add will added to a new graph.
    `
-  
 
    return `
    You are an automated character graph generator. Given an excerpt from a book, you will generate a character graph
@@ -104,13 +106,95 @@ const generatePrompt = (params: {
   ${params.bookChunk}
 
   ${existingGraphInstructions}
-`
+
+  Generate an JSON object with one key: "events". The value of events should be an array
+  of events to emit, in the format demonstrated above. If no character changes are
+  present in the excerpt, emit an empty array.
+`}
+
+type MutationType = 'ADD_CHARACTER' | 'ADD_CHARACTERISTIC' | 'ADD_RELATIONSHIP' | 'MODIFY_CHARACTERISTIC' | 'MODIFY_RELATIONSHIP'
+
+type GraphMutation = {
+  type: 'ADD_CHARACTER',
+  id: string,
+} | {
+  type: 'ADD_CHARACTERISTIC',
+  id: string,
+  characterId: string,
+  characteristicType?: CharacteristicType,
+  info: string
+} | {
+  type: 'ADD_RELATIONSHIP',
+  id: string,
+  fromCharacterId: string,
+  toCharacterId: string,
+  info: string
+} | {
+  type: 'MODIFY_CHARACTERISTIC',
+  id: string,
+  info: string
+} | {
+  type: 'MODIFY_RELATIONSHIP',
+  id: string,
+  info: string
 }
 
-const generateCharacterGraph = () => {
-  const processChunk: ProcessChunk = ({ chunk, allChunks, lastResponse }) => {
+type PromptOutput = {
+  events: GraphMutation[]
+}
 
+const mergeEventsIntoGraph = (events: GraphMutation[]): CharacterGraph => {
+  const newGraph: CharacterGraph = {
+    characters: {},
+    characteristics: {},
+    relationships: {}
+  }
 
-    return lastResponse
+  for (const event of events) {
+    switch (event.type) {
+      case 'ADD_CHARACTER':
+        newGraph.characters[event.id] = {
+          id: event.id,
+          name: event.id
+        }
+        break
+      case 'ADD_CHARACTERISTIC':
+        newGraph.characteristics[event.id] = {
+          id: event.id,
+          characterId: event.characterId,
+          characteristicType: event.characteristicType,
+          info: event.info
+        }
+        break
+      case 'ADD_RELATIONSHIP':
+        newGraph.relationships[event.id] = {
+          id: event.id,
+          fromCharacterId: event.fromCharacterId,
+          toCharacterId: event.toCharacterId,
+          info: event.info
+        }
+        break
+      case 'MODIFY_CHARACTERISTIC':
+        newGraph.characteristics[event.id].info = event.info
+        break
+      case 'MODIFY_RELATIONSHIP':
+        newGraph.relationships[event.id].info = event.info
+        break
+    }
+  }
+
+  return newGraph
+}
+
+const processChunk: ProcessChunk<PromptOutput> = ({ chunk, aggregatedResponse }) => {
+  const existingGraph = aggregatedResponse ? mergeEventsIntoGraph(aggregatedResponse.events) : null
+
+  const prompt = generatePrompt({
+    characterGraph: existingGraph,
+    bookChunk: chunk
+  })
+
+  return {
+    events: []
   }
 }
