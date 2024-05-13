@@ -1,7 +1,6 @@
-const fs = require('fs')
+import { chapterStartRegex } from "./utils"
 
 // Regex that matches word chapter, followed by at most 5 non-whitespace characters
-const chapterStartRegex = /^CHAPTER\s*\S{0,5}$/
 
 const defaultIsChunkBreak = (line: string) => {
   return chapterStartRegex.test(line.trim().toUpperCase())
@@ -21,7 +20,7 @@ export const getBookChunks = (params: {
   for (const line of bookLines) {
     if (isChunkBreak(line)) {
       chunks.push(currentChunk.join('\n'))
-      currentChunk = []
+      currentChunk = [line]
     } else {
       currentChunk.push(line)
     }
@@ -46,34 +45,56 @@ export const parseBookIntoChunks = (
   return chunks
 }
 
+export type OnProcessChunk<ResponseType = any> = (params: {
+  processed: ResponseType,
+  chunk: string,
+  chunkIndex: number
+}) => Promise<void>
+
 export type ProcessChunk<
   ResponseType = any,
 > = (params: {
   chunk: string,
-  aggregatedResponse: ResponseType | null
-}) => ResponseType
+  chunkIndex: number,
+  aggregatedResponse: ResponseType | null,
+  onProcessChunk?: (params: {
+    processed: ResponseType,
+    chunk: string,
+    chunkIndex: number
+  }) => Promise<void>
+}) => Promise<ResponseType>
 
-
-export function processBook<ResponseType = any>(params: {
+export async function processBook<ResponseType = any>(params: {
   getBookContents: () => string,
+  saveAggregatedResponse: (response: ResponseType) => Promise<void>,
   processChunk: ProcessChunk<ResponseType>,
+  onProcessChunk?: OnProcessChunk<ResponseType> 
 }) {
   const {
     getBookContents,
     processChunk,
+    saveAggregatedResponse,
+    onProcessChunk
   } = params
 
   const bookContents = getBookContents()
   const chunks = parseBookIntoChunks(bookContents)
 
-  let aggregatedResponse = null
+  let aggregatedResponse: ResponseType | null = null
 
-  for (const chunk of chunks) {
-    aggregatedResponse = processChunk({
+  // for (const [chunk, ] of unks) {
+  for (const [chunkIndex, chunk] of chunks.entries()) {
+    console.log('Processing chunk', chunkIndex)
+
+    aggregatedResponse = await processChunk({
       chunk,
-      aggregatedResponse
+      chunkIndex,
+      aggregatedResponse,
+      onProcessChunk: params.onProcessChunk
     })
   }
+
+  saveAggregatedResponse(aggregatedResponse as ResponseType)
 
   return aggregatedResponse
 }
