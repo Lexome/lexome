@@ -23,6 +23,8 @@ const checkReadingComprehensionTypes = async (res: any) => {
   return readingComprehensionType;
 }
 
+const READING_COMPREHENSION_TYPE_NAME = 'test'
+
 
 
 export const addRoutes = (app: Express) => {

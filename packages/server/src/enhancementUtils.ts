@@ -2,7 +2,6 @@ import { Prisma, PrismaClient } from '@prisma/client'
 import { applyOperation, applyPatch, Operation, Operation as PatchOperation } from 'fast-json-patch'
 
 import { ZodObject } from 'zod'
-import zod from 'zod'
 import { MiddlewareRequest } from './middleware';
 
 // Needed to omit the path property from all operation subtypes

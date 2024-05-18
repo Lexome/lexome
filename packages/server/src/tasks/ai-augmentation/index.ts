@@ -8,21 +8,6 @@ import { cleanForAnalysis, cleanForHashing } from "./cleanText";
 const PROCESSED_DIRECTORY = path.join(__dirname, '../processed')
 const NEEDS_PROCESSING_DIRECTORY = path.join(__dirname, '../needs-processing')
 
-// For every book in the needs-processing directory
-// Create a hash index for the book
-// Write the hash index to the processed directory
-// using the filename ${filename}-hash-index.json
-
-// import {
-//   createHash,
-// } from 'crypto';
-
-// async function sha256(message: string) {
-//   const hash = createHash('sha256');
-//   hash.update(message);
-//   return hash.digest('hex');
-// }
-
 // Returns starting position of series of word in longer series of words
 // Or -1 if not found
 const findWords = (wordListQuery: string[], wordList: string[]) => {

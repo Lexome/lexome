@@ -1,0 +1,105 @@
+type Query {
+  getBooks(
+    query: String,
+    filters: {
+      authors: [String],
+      genres: [String],
+    },
+    pagination: {
+      limit: Int,
+      offset: Int,
+    },
+  ): [Book!]!
+  getBook(id: String!): Book
+  getAuthors(
+    query: String
+  ): [Author!]!
+  getAuthor(id: String!): Author
+  getGenres: [Genre!]!
+  getGenre(id: String!): Genre
+  getEnhancementsForBook(bookId: String!): [Enhancement!]!
+  getEnhancement(id: String!): Enhancement
+  getSubscriptionsForUser(userId: String!): [Subscription!]!
+  getSubscription(id: String!): Subscription
+}
+
+type User {
+  id: String!
+  createdAt: String!
+  profilePicture: String
+  firstName: String
+  lastName: String
+  isAdmin: Boolean!
+  phone: String
+  verificationCode: String
+  enhancementEvents: [EnhancementEvent!]!
+  subscriptions: [Subscription!]!
+}
+
+type Author {
+  id: String
+  createdAt: String
+  user: User!
+  books: [Book!]!
+}
+
+type Book {
+  id: String!
+  createdAt: String!
+  title: String!
+  description: String
+  coverUrl: String
+  assetUrl: String
+  authors: [Author]
+  enhancements: [Enhancement]
+  genres: [Genre]
+}
+
+type Genre {
+  id: String!
+  createdAt: String!
+  name: String!
+  books: [Book]
+}
+
+type Enhancement {
+  id: String!
+  createdAt: String!
+  title: String!
+  data: String!
+  book: Book!
+  includedTypes: [EnhancementType!]!
+  updateEvents: [EnhancementEvent!]!
+  subscriptions: [Subscription!]!
+}
+
+type Subscription {
+  id: String!
+  createdAt: String!
+  user: User!
+  enhancement: Enhancement!
+  role: Role!
+}
+
+enum Role {
+  admin
+  user
+}
+
+type EnhancementEvent {
+  id: String!
+  createdAt: String!
+  operation: String!
+  enhancement: Enhancement!
+  createdBy: User!
+  type: EnhancementType!
+}
+
+type EnhancementType {
+  id: String!
+  createdAt: String!
+  slug: String!
+  displayName: String!
+  enhancements: [Enhancement!]!
+  enhancementEvents: [EnhancementEvent!]!
+}
