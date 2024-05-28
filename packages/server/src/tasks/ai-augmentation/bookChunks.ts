@@ -14,7 +14,7 @@ export const getBookChunks = (params: {
     bookLines,
     isChunkBreak=defaultIsChunkBreak
   } = params
-  const chunks = []
+  const chunks: string[] = []
   let currentChunk: string[] = []
 
   for (const line of bookLines) {

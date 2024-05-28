@@ -3,7 +3,10 @@ import { chapterStartRegex } from "./utils"
 export const cleanForAnalysis = (originalText: string) => {
   let newText = originalText
 
-  const textsToReplace = []
+  const textsToReplace: {
+    textToReplace: string,
+    replacementText: string,
+  }[] = []
 
   // Find sections of text demarcated by /* and */
   // These are places of the book text that are formatted a certain

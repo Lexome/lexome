@@ -1,26 +1,114 @@
+input BookFilters {
+  authors: [String]
+  genres: [String]
+}
+
+input Pagination {
+  limit: Int
+  offset: Int
+}
+
 type Query {
   getBooks(
     query: String,
-    filters: {
-      authors: [String],
-      genres: [String],
-    },
-    pagination: {
-      limit: Int,
-      offset: Int,
-    },
+    filters: BookFilters,
+    pagination: Pagination
   ): [Book!]!
   getBook(id: String!): Book
   getAuthors(
-    query: String
+    query: String,
+    pagination: Pagination
   ): [Author!]!
   getAuthor(id: String!): Author
-  getGenres: [Genre!]!
-  getGenre(id: String!): Genre
-  getEnhancementsForBook(bookId: String!): [Enhancement!]!
-  getEnhancement(id: String!): Enhancement
-  getSubscriptionsForUser(userId: String!): [Subscription!]!
-  getSubscription(id: String!): Subscription
+  getUploadBookUrl: String
+  #getGenres: [Genre!]!
+  #getGenre(id: String!): Genre
+  # getEnhancementsForBook(bookId: String!): [Enhancement!]!
+  # getEnhancement(id: String!): Enhancement
+  # getSubscriptionsForUser(userId: String!): [Subscription!]!
+  # getSubscription(id: String!): Subscription
+}
+
+type Mutation {
+  createBook(
+    title: String!,
+    description: String,
+    coverUrl: String,
+    assetUrl: String,
+    authors: [String],
+    genres: [String],
+  ): Book
+  #updateBook(
+  #  id: String!,
+  #  title: String,
+  #  description: String,
+  #  coverUrl: String,
+  #  assetUrl: String,
+  #  authors: [String],
+  #  genres: [String],
+  #): Book
+  deleteBook(id: String!): Book
+  createAuthor(
+    userId: String,
+    displayName: String!,
+    bookIds: [String],
+  ): Author
+  #updateAuthor(
+  #  id: String!,
+  #  userId: String,
+  #  bookIds: [String],
+  #): Author
+  #deleteAuthor(id: String!): Author
+  #createGenre(
+  #  name: String!,
+  #  bookIds: [String],
+  #): Genre
+  # updateGenre(
+  #   id: String!,
+  #   name: String,
+  #   bookIds: [String],
+  #): Genre
+  #deleteGenre(id: String!): Genre
+  # createEnhancement(
+  #   title: String!,
+  #   data: String!,
+  #   bookId: String!,
+  #   includedTypes: [String],
+  # ): Enhancement
+  # updateEnhancement(
+  #   id: String!,
+  #   title: String,
+  #   data: String,
+  #   bookId: String,
+  #   includedTypes: [String],
+  # ): Enhancement
+  # deleteEnhancement(id: String!): Enhancement
+  # createSubscription(
+  #   userId: String!,
+  #   enhancementId: String!,
+  #   role: Role!,
+  # ): Subscription
+  # updateSubscription(
+  #   id: String!,
+  #   userId: String,
+  #   enhancementId: String,
+  #   role: Role,
+  # ): Subscription
+  # deleteSubscription(id: String!): Subscription
+  # createEnhancementEvent(
+  #   operation: String!,
+  #   enhancementId: String!,
+  #   createdBy: String!,
+  #   type: String!,
+  # ): EnhancementEvent
+  # updateEnhancementEvent(
+  #   id: String!,
+  #   operation: String,
+  #   enhancementId: String,
+  #   createdBy: String,
+  #   type: String,
+  # ): EnhancementEvent
+  # deleteEnhancementEvent(id: String!): EnhancementEvent
 }
 
 type User {
@@ -39,7 +127,8 @@ type User {
 type Author {
   id: String
   createdAt: String
-  user: User!
+  user: User
+  displayName: String
   books: [Book!]!
 }
 
