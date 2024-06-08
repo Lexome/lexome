@@ -5,8 +5,11 @@ import { createHash } from "crypto"
 
 export const resolvers = {
   Query: {
-    getAuthors: async (parent, { query, pagination }) => {
+    getAuthors: async (_, { query, pagination }) => {
       try {
+        const offset = pagination?.offset || 0
+        const limit = pagination?.limit || 50
+
         const authors = await prismaClient.author.findMany({
           where: query ? {
             OR: [{
@@ -16,21 +19,25 @@ export const resolvers = {
               },
             }],
           } : undefined,
-          skip: pagination?.offset || 0,
-          take: pagination?.limit || 10,
+          skip: offset,
+          take: limit + 1,
         })
 
-        console.log('authors', authors)
+        const records = authors.map(convertObjectPropertiesToCamelCase).slice(0, limit)
 
-        return authors.map(convertObjectPropertiesToCamelCase)
+        return {
+          records,
+          pageInfo: {
+            hasMore: authors.length > limit,
+            offset
+          }
+        }
       } catch (e) {
         console.log('here!')
         console.error(e)
 
         return []
       }
-
-
     },
 
     getAuthor: async (parent, { id }, { models }) => {

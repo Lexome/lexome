@@ -89,7 +89,6 @@ export const getEbookLinks = async () => {
   })
 
   while (hasNext) {
-    console.log('clicking next')
     await page.click('a[rel="next"]')
     await page.waitForTimeout(1000)
     await evaluatePage()

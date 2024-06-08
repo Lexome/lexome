@@ -1,28 +1,53 @@
+import { Prisma } from "@prisma/client"
 import { convertObjectPropertiesToCamelCase } from "../../utils"
 import { prismaClient } from "../prismaClient"
 
 export const resolvers = {
   Query: {
-    getBooks: async (parent, args, { models }) => {
-      const { title, authorId, pagination } = args
+    getBooks: async (parent, args) => {
+      const { query, authorId, pagination } = args
 
-      const where = {
-        OR: [
-          { title: { contains: title } },
-          { authorId },
-        ],
+      const conditions: Prisma.bookWhereInput[] = []
+
+      if (query) {
+        conditions.push({
+          title: { contains: query, mode: 'insensitive'}
+        })
       }
 
+      if (authorId) {
+        conditions.push({
+          authors: {
+            some: {
+              id: authorId
+            }
+          }
+        })
+      }
+
+      const limit = pagination?.limit || 50
+      const offset = pagination?.offset || 0
+
       const books = await prismaClient.book.findMany({
-        where,
-        skip: pagination?.offset || 0,
-        take: pagination?.limit || 10,
+        where: conditions ? {
+          AND: conditions
+        } : undefined,
+        skip: offset,
+        take: limit + 1,
       })
 
-      return books.map(convertObjectPropertiesToCamelCase)
+       const renderedBooks = books.map(convertObjectPropertiesToCamelCase).slice(0, limit)
+
+      return {
+        records: renderedBooks.slice(0, limit),
+        pageInfo: {
+          hasMore: books.length > limit,
+          offset
+        }
+      }
     },
 
-    getBook: async (parent, { id }, { models }) => {
+    getBook: async (parent, { id }) => {
       const book = await prismaClient.book.findUnique({
         where: { id },
       })

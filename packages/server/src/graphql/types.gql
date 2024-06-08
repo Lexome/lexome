@@ -13,14 +13,13 @@ type Query {
     query: String,
     filters: BookFilters,
     pagination: Pagination
-  ): [Book!]!
+  ): BookConnection
   getBook(id: String!): Book
   getAuthors(
     query: String,
     pagination: Pagination
-  ): [Author!]!
+  ): AuthorConnection
   getAuthor(id: String!): Author
-  getUploadBookUrl: String
   #getGenres: [Genre!]!
   #getGenre(id: String!): Genre
   # getEnhancementsForBook(bookId: String!): [Enhancement!]!
@@ -132,6 +131,16 @@ type Author {
   books: [Book!]!
 }
 
+type AuthorConnection {
+  records: [Author!]!
+  pageInfo: PageInfo!
+}
+
+type PageInfo {
+  offset: Int!,
+  hasMore: Boolean!
+}
+
 type Book {
   id: String!
   createdAt: String!
@@ -142,6 +151,11 @@ type Book {
   authors: [Author]
   enhancements: [Enhancement]
   genres: [Genre]
+}
+
+type BookConnection {
+  records: [Book!]!
+  pageInfo: PageInfo!
 }
 
 type Genre {
