@@ -1,7 +1,5 @@
-import { create } from "domain"
 import { convertObjectPropertiesToCamelCase } from "../../utils"
 import { prismaClient } from "../prismaClient"
-import { createHash } from "crypto"
 
 export const resolvers = {
   Query: {
@@ -61,5 +59,22 @@ export const resolvers = {
 
       return convertObjectPropertiesToCamelCase(author)
     }
-  }
+  },
+
+  Author: {
+    books: async (parent) => {
+      const { id: authorId } = parent
+
+      const author = await prismaClient.author.findUnique({
+        where: {
+          id: authorId
+        },
+        include: {
+          books: true 
+        }
+      })
+
+      return author?.books.map(convertObjectPropertiesToCamelCase) || []
+    }
+  },
 }
