@@ -83,5 +83,52 @@ export const resolvers = {
 
       return convertObjectPropertiesToCamelCase(book)
     },
+  },
+
+  Book: {
+    authors: async (parent) => {
+      const { id } = parent
+
+      const book = await prismaClient.book.findUnique({
+        where: { id },
+        include: {
+          authors: true
+        }
+      }) 
+
+      return book?.authors.map(convertObjectPropertiesToCamelCase) || []
+
+      // const authors = await loaders.authorsForBookLoader.load(id)
+
+
+
+      // return authors.map(convertObjectPropertiesToCamelCase)
+    },
+
+    genres: async (parent) => {
+      const { id } = parent
+      const genres = await prismaClient.genre.findMany({
+        where: {
+          books: {
+            some: {
+              id
+            }
+          }
+        }
+      })
+
+      return genres.map(convertObjectPropertiesToCamelCase)
+    },
+
+    enhancements: async (parent) => {
+      const { id } = parent
+      const enhancements = await prismaClient.enhancement.findMany({
+        where: {
+          book_id: id
+        }
+      })
+
+      return enhancements.map(convertObjectPropertiesToCamelCase)
+    }
   }
 }
