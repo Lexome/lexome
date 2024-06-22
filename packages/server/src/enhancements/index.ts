@@ -1,8 +1,19 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+
+import { prisma } from '../prisma';
+import { User } from '../user';
+// import {
+//   defaultErrors,
+//   defaultSecurityRule,
+//   success,
+//   getByIdParams
+// } from './spec/shared/misc'
+
 import { applyOperation, applyPatch, Operation, Operation as PatchOperation } from 'fast-json-patch'
 
 import { ZodObject } from 'zod'
-import { MiddlewareRequest } from './middleware';
+import { Prisma, PrismaClient, EnhancementType } from '@prisma/client';
+
+import { enhancementTypeSpecs } from './enhancementTypeSpecs';
 
 // Needed to omit the path property from all operation subtypes
 type DistributiveOmit<T, K extends keyof any> = T extends any
@@ -20,44 +31,36 @@ export type PrismaModels = {
   >;
 };
 
-const prisma = new PrismaClient()
-
-export const isUserAdmin = (params: {
-  req: MiddlewareRequest,
-  enhancementId: string
+export const getUserRole = ({
+  enhancementId,
+  user
+}:{
+  enhancementId: string,
+  user: User
 }) => {
-  if (!params.req.user) {
-    return false
-  }
-
-  const adminSubscriptions = params.req.user.subscriptions.filter(sub => {
-    sub.role === 'admin' &&
-    sub.enhancement_id === params.enhancementId
+  const subscriptions = user.subscriptions.filter(sub => {
+    sub.enhancement_id === enhancementId
   });
 
-  return adminSubscriptions.length > 0
-}
-
-export const isUserSubscribed = (params: {
-  req: MiddlewareRequest,
-  enhancementId: string
-}) => {
-  if (!params.req.user) {
-    return false
+  if (subscriptions.length === 0) {
+    return new Error('User unauthorized')
   }
 
-  const subscriptions = params.req.user.subscriptions.filter(sub => {
-    sub.enhancement_id === params.enhancementId
-  });
+  if (subscriptions.length > 1) {
+    throw new Error('Multiple subscriptions found')
+  }
 
-  return subscriptions.length > 0
+  const subscription = subscriptions[0]
+  return subscription.role
 }
 
 export const coalesceEnhancementData = async (params: {
   enhancement: PrismaModels['enhancement'],
-  enhancementTypes: PrismaModels['enhancement_type'][],
 }) => {
-  const { enhancement, enhancementTypes } = params
+  const { enhancement } = params
+  const types = enhancement.included_types
+
+  const typeSpecs = types.map((type) => enhancementTypeSpecs[type])
 
   const coalescedData: Record<string, any> = enhancement.coalesced_data || {} as any
   const lastCoalescedTimestamp = enhancement.coalesced_timestamp
@@ -71,10 +74,10 @@ export const coalesceEnhancementData = async (params: {
     },
   })
 
-  for (const type of enhancementTypes) {
+  for (const type of typeSpecs) {
     const coalescedDataForType = coalescedData[type.slug] || {}
 
-    const typeEvents = newEvents.filter((e) => e.type_id === type.id)
+    const typeEvents = newEvents.filter((e) => e.type === type.slug)
 
     if (typeEvents.length > 0) {
       applyPatch(coalescedDataForType, typeEvents.map(e => e.operation as unknown as Operation))
@@ -86,14 +89,13 @@ export const coalesceEnhancementData = async (params: {
   return coalescedData
 }
 
+type Enhancement = PrismaModels['enhancement']
+
 export const getEnhancement = async (enhancementId: string) => {
   const enhancement = await prisma.enhancement.findUnique({
     where: {
       id: enhancementId,
     },
-    include: {
-      included_types: true
-    }
   })
 
   if (!enhancement) {
@@ -102,13 +104,12 @@ export const getEnhancement = async (enhancementId: string) => {
 
   const coalescedData = coalesceEnhancementData({
     enhancement,
-    enhancementTypes: enhancement.included_types
   })
 
   return coalescedData
 }
 
-export async function addEnhancementEvent<
+export async function createEnhancementEvent<
   Schema extends ZodObject<any>,
   Shape extends ReturnType<Schema['parse']>,
   A extends keyof Shape,
@@ -119,7 +120,7 @@ export async function addEnhancementEvent<
   F extends keyof Shape[A][B][C][D][E]=never,
 > (params: {
   enhancementId: string,
-  enhancementTypeId: string
+  enhancementType: EnhancementType,
   operation: BaseOperation,
   path: [A, B?, C?, D?, E?, F?],
   schema: Schema,
@@ -129,30 +130,24 @@ export async function addEnhancementEvent<
     where: {
       id: params.enhancementId,
     },
-    include: {
-      included_types: true
-    }
   })
 
   if (!enhancement) {
     throw new Error('Enhancement not found')
   }
 
-  const enhancementType = enhancement.included_types.find((t) => t.id === params.enhancementTypeId)
+  const enhancementType = enhancement.included_types.find((t) => t === params.enhancementType)
 
   if (!enhancementType) {
     throw new Error('Enhancement type not found')
   }
 
-  const typeSlug = enhancementType.slug
-
   try {
     const coalescedData = await coalesceEnhancementData({
       enhancement,
-      enhancementTypes: enhancement.included_types,
     })
 
-    const coalescedDataForType = coalescedData[typeSlug]
+    const coalescedDataForType = coalescedData[enhancementType]
 
     const operation: PatchOperation = {
       ...params.operation,
@@ -168,8 +163,8 @@ export async function addEnhancementEvent<
     await prisma.enhancement_event.create({
       data: {
         enhancement_id: enhancement.id,
+        type: enhancementType,
         operation: params.operation as any,
-        type_id: params.enhancementTypeId,
         created_by_id: params.userId
       },
     }) 
@@ -183,9 +178,6 @@ export const findAndCoalesceEnhancement = async (enhancementId: string) => {
     where: {
       id: enhancementId,
     },
-    include: {
-      included_types: true
-    }
   })
 
   if (!enhancement) {
@@ -194,7 +186,6 @@ export const findAndCoalesceEnhancement = async (enhancementId: string) => {
 
   const coalescedData = await coalesceEnhancementData({
     enhancement,
-    enhancementTypes: enhancement.included_types
   })
 
   return {

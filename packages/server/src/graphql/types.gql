@@ -20,12 +20,13 @@ type Query {
     pagination: Pagination
   ): AuthorConnection
   getAuthor(id: String!): Author
+
+  getEnhancementsForBook(bookId: String!): [Enhancement!]!
+  getSubscriptions(bookId: String): [Enhancement!]!
+
   #getGenres: [Genre!]!
   #getGenre(id: String!): Genre
-  # getEnhancementsForBook(bookId: String!): [Enhancement!]!
-  # getEnhancement(id: String!): Enhancement
-  # getSubscriptionsForUser(userId: String!): [Subscription!]!
-  # getSubscription(id: String!): Subscription
+  #getSubscriptionsForUser(userId: String!): [Subscription!]!
 }
 
 type Mutation {
@@ -58,6 +59,22 @@ type Mutation {
   #  bookIds: [String],
   #): Author
   #deleteAuthor(id: String!): Author
+
+  createSubscription(enhancementId: String!, role: Role): Subscription
+  createEnhancement(
+    title: String!,
+    bookId: String!,
+    includedTypes: [String],
+  ): Enhancement
+  createEnhancementEvent(
+    operationType
+    path: [String!]!,
+    enhancementId: String!,
+
+
+
+  )
+
   #createGenre(
   #  name: String!,
   #  bookIds: [String],
@@ -68,12 +85,7 @@ type Mutation {
   #   bookIds: [String],
   #): Genre
   #deleteGenre(id: String!): Genre
-  # createEnhancement(
-  #   title: String!,
-  #   data: String!,
-  #   bookId: String!,
-  #   includedTypes: [String],
-  # ): Enhancement
+
   # updateEnhancement(
   #   id: String!,
   #   title: String,
@@ -108,6 +120,12 @@ type Mutation {
   #   type: String,
   # ): EnhancementEvent
   # deleteEnhancementEvent(id: String!): EnhancementEvent
+}
+
+enum OperationType {
+  add
+  remove
+  replace
 }
 
 type User {

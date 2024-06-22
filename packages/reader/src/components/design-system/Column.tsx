@@ -1,6 +1,6 @@
 import { styled } from '@/theme';
 
-export const Row = styled('div', {
+export const Column = styled('div', {
   styles: {
     flexDirection: 'column',
     display: 'flex'

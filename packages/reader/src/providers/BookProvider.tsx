@@ -1,13 +1,19 @@
+import { useBookAsset } from "@/hooks/data/useBookAsset"
 import { LEFT_PANEL_STATE, RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } from "@/hooks/usePanel"
+import { useQueryParams } from "@/hooks/useQueryParams"
 import ePub, { Book, Rendition } from 'epubjs'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 
+const MAX_READABLE_WIDTH = 650
+
 const BookContext = createContext<{
+  isLoading: boolean,
   book?: Book,
   setBook: (book: Book) => void,
   rendition?: Rendition,
   setRendition: (rendition: Rendition) => void
 }>({
+  isLoading: true,
   setBook: () => {},
   setRendition: () => {}
 })
@@ -31,7 +37,7 @@ const useReaderDimensions = () => {
   })
 
   return useMemo(() => ({
-    width: Math.min(width - (panelWidth as number), 700),
+    width: Math.min(width - (panelWidth as number), MAX_READABLE_WIDTH),
     height: height - 60,
   }), [rightPanelState, leftPanelState])
 }
@@ -45,11 +51,17 @@ const debounce = (func: Function, wait: number) => {
   }
 }
 
-export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+type BookProviderProps = React.PropsWithChildren<{
+  bookId: string
+}>
+
+export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
+  const { bookId } = useQueryParams()
+  const {data: bookAsset, isLoading} = useBookAsset(bookId)
+
   const [book, setBook] = useState<Book | undefined>()
   const [_, setRightPanelState] = useRightPanel()
   const [rendition, setRendition] = useState<Rendition | undefined>()
-
   // const [selectedRange, setSelectedRange] = useState<string | undefined>()
   // const [selectedParagraph, setSelectedParagraph] = useState<string | undefined>()
 
@@ -63,7 +75,9 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   useEffect(() => {
     // const el = document.getElementById("lexome_reader")
-    const book = ePub("https://s3.amazonaws.com/moby-dick/OPS/package.opf"); 
+    if (!bookAsset) return
+
+    const book = ePub(bookAsset); 
 
     if (typeof window === 'undefined') return
 
@@ -72,11 +86,21 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       // flow: 'scrolled-doc'
     });
 
+    rendition.themes.register("main",
+      {
+        "p": {
+          "margin-top": "8px",
+          "font-size": "18px",
+          "line-height": "1.5",
+          "color": '#555555',
+        }
+      }
+    );
+    rendition.themes.select("main");
+
     rendition.display();
 
     rendition.on("selected", async function(cfiRange: any, contents: any) {
-      console.log('highlights', highlights)
-
       for (const highlight of highlights.current) {
         rendition.annotations.remove(highlight, 'underline')
       }
@@ -99,7 +123,7 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
     setBook(book)
     setRendition(rendition)
-  }, [])
+  }, [bookAsset])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -110,12 +134,14 @@ export const BookProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   }, [readerDimensions])
 
   return (
-    <BookContext.Provider value={{
-      book,
-      setBook,
-      rendition,
-      setRendition
-    }}>
+    <BookContext.Provider
+      value={{
+        book,
+        setBook,
+        rendition,
+        setRendition
+      }}
+    >
       {children}
     </BookContext.Provider>
   )
