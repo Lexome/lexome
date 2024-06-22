@@ -1,7 +1,7 @@
 import { theme } from "@/theme"
 
-import { WebKitNProvider, WebTheme, createStyled } from "@style-kit-n/web"
-import React, { FC, PropsWithChildren, useEffect, useRef } from "react"
+import { WebKitNProvider } from "@style-kit-n/web"
+import React, { FC, PropsWithChildren } from "react"
 
 export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   return (

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { graphql } from "../../../gql"
 import request from "graphql-request"
+import { GRAPHQL_ENDPOINT } from "@/config"
 
 const STORE_BOOK_LIST = 'store_book_list'
 
@@ -25,21 +26,33 @@ query ListStoryBooks($query: String, $pagination: Pagination) {
 }
 `)
 
-export const useStoreBookList = () => {
+export const useStoreBookList = (params: {
+  query?: string,
+  pagination?: {
+    offset?: number
+  }
+}) => {
   return useQuery({
-    queryKey: [STORE_BOOK_LIST],
+    queryKey: [STORE_BOOK_LIST, params.query],
     queryFn: async () => {
-      return request({
-        document: listStoreBooksQuery,
-        url: GRAPHQL_ENDPOINT,
-        variables: {
-          query: '',
-          pagination: {
-            limit: 10,
-            offset: 0,
+      try {
+        const response = await request({
+          document: listStoreBooksQuery,
+          url: GRAPHQL_ENDPOINT,
+          variables: {
+            query: params.query,
+            pagination: {
+              limit: 20,
+              offset: params.pagination?.offset || 0,
+            },
           },
-        },
-      })
+        })
+        return response
+      } catch (e) {
+        console.error(e)
+      }
+
+      return null
     },
   })
 }

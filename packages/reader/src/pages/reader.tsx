@@ -14,10 +14,12 @@ import { Button, BUTTON_TYPE } from '../components/design-system/Button';
 
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
-import { DynamicContent } from '@/components/DynamicContent';
 import { styled } from '@/theme';
-import { animated, useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
+import { useQueryParams } from '@/hooks/useQueryParams';
+import { PreventSsr } from '@/components/PreventSsr';
+import { ButtonSliderMenu } from '@/components/design-system/ButtonSliderMenu';
+import { Column } from '@/components/design-system/Column';
 
 // const slideIn = stylex.keyframes({
 //   '0%': {transform: 'translateX(0%)'},
@@ -345,7 +347,23 @@ const Reader = () => {
           {...getRightSliderProps()}
         >
           <RightPanel panelWidth={rightPanelPx}>
-            Hello world
+            <Column px={3} py={4}>
+              <Row
+                style={{
+                  width: '100%',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <ButtonSliderMenu
+                  value="test"
+                  options={[
+                    { label: 'Summary', value: 'test' },
+                    { label: 'Voice', value: 'test2' }
+                  ]}
+                  onChange={() => {}}
+                />
+              </Row>
+            </Column>
           </RightPanel>
         </RightPanelTouchContainer>
       </Row>
@@ -419,26 +437,16 @@ const ControlPanel = () => {
   )
 }
 
-const PageWrapper = styled('main', {
-  styles: {
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-    height: '100vh',
-    width: '100vw'
-  }
-})
+export default function() {
+  const { bookId } = useQueryParams()
 
-export default function Home() {
   return (
-    <>
+    <PreventSsr>
       <main>
-        <DynamicContent>
-          <BookProvider>
-            <Reader />
-          </BookProvider>
-        </DynamicContent>
+        <BookProvider bookId={bookId}>
+          <Reader />
+        </BookProvider>
       </main>
-    </>
+    </PreventSsr>
   )
 }

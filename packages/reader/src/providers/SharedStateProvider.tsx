@@ -1,26 +1,26 @@
 
-import React, { FC, PropsWithChildren, useEffect, useRef } from "react"
+import React, { FC, PropsWithChildren, useRef } from "react"
 
-type GlobalState = {
+type SharedState = {
   [key: string]: any
 }
 
-type GlobalStateOperations = {
-  read: () => GlobalState,
+type SharedStateOperations = {
+  read: () => SharedState,
   write: (key: string, value: any) => void,
   watchForUpdates: (key: string, subscription: Function) => void
   endWatch: (key: string, subscription: Function) => void
 }
 
-const GlobalStateContext = React.createContext<GlobalStateOperations>({
+export const SharedStateContext = React.createContext<SharedStateOperations>({
   read: () => ({}),
   write: () => {},
   watchForUpdates: () => {},
   endWatch: () => {}
 })
 
-export const GlobalStateProvider: FC<PropsWithChildren> = ({ children }) => {
-  const state = useRef<GlobalState>({})
+export const SharedStateProvider: FC<PropsWithChildren> = ({ children }) => {
+  const state = useRef<SharedState>({})
   const rerendersToTrigger = useRef<{
     [key: string]: Function[]
   }>({})
@@ -53,7 +53,7 @@ export const GlobalStateProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
   return (
-    <GlobalStateContext.Provider
+    <SharedStateContext.Provider
       value={{
         read,
         write,
@@ -62,47 +62,7 @@ export const GlobalStateProvider: FC<PropsWithChildren> = ({ children }) => {
       }}
     >
       {children}
-    </GlobalStateContext.Provider>
+    </SharedStateContext.Provider>
   )
 }
 
-export function useSharedState<T> (key: string, initialValue: T): [T, (value: T) => void] {
-  const {
-    read,
-    write,
-    watchForUpdates,
-    endWatch
-  } = React.useContext(GlobalStateContext)
-
-  // Support manual rerendering
-  const [
-    renderCount, // eslint-disable-line @typescript-eslint/no-unused-vars
-    setRenderCount 
-  ] = React.useState(0)
-
-  const forceRerender = () => setRenderCount(value => value + 1)
-
-  useEffect(() => {
-    const rerender = () => {
-      forceRerender()
-    }
-
-    watchForUpdates(key, rerender)
-
-    return () => {
-      endWatch(key, rerender)
-    }
-  })
-
-  const update = (value: T) => {
-    write(key, value)
-  }
-
-  const val = read()[key] || initialValue
-
-  return [
-    val as T,
-    update
-  ]
-}
- 

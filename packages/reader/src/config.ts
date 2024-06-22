@@ -1,1 +1,1 @@
-const GRAPHQL_ENDPOINT = '127.0.0.1:4000'
+export const GRAPHQL_ENDPOINT = 'http://127.0.0.1:4000'

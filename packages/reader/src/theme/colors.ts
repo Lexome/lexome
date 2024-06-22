@@ -2,6 +2,7 @@ export enum COLOR {
   PRIMARY_DARK = 'primary_dark',
   PRIMARY = 'primary',
   PRIMARY_LIGHT = 'primary_light',
+  PRIMARY_FAINT = 'primary_faint',
   SECONDARY_DARK = 'secondary_dark',
   SECONDARY = 'secondary',
   SECONDARY_LIGHT = 'secondary_light',
@@ -15,13 +16,17 @@ export enum COLOR {
   DARK_GRAY = 'dark_gray',
   GRAY = 'gray',
   LIGHT_GRAY = 'light_gray',
+  FAINT_GRAY = 'faint_gray',
   WHITE = 'white',
+  OFF_WHITE = 'off_white',
+  TRANSPARENT = 'transparent',
 }
 
 export const colors = {
   [COLOR.PRIMARY_DARK]: '#10182e',
-  [COLOR.PRIMARY]: '#3d557f',
+  [COLOR.PRIMARY]: '#12469f',
   [COLOR.PRIMARY_LIGHT]: '#ccdffb',
+  [COLOR.PRIMARY_FAINT]: '#f0f6ff',
   [COLOR.SECONDARY_DARK]: '10182e',
   [COLOR.SECONDARY]: '#302640',
   [COLOR.SECONDARY_LIGHT]: '#bda9c6',
@@ -34,6 +39,9 @@ export const colors = {
   [COLOR.BLACK]: '#000000',
   [COLOR.DARK_GRAY]: '#cccccc',
   [COLOR.GRAY]: '#767676',
-  [COLOR.LIGHT_GRAY]: '#f2f2f2',
+  [COLOR.LIGHT_GRAY]: '#dddddd',
+  [COLOR.FAINT_GRAY]: '#f5f5f5',
   [COLOR.WHITE]: '#ffffff',
+  [COLOR.OFF_WHITE]: '#fafafa',
+  [COLOR.TRANSPARENT]: 'rgba(0, 0, 0, 0)',
 }
