@@ -22,7 +22,7 @@ model user {
   verification_code    String?
   enhancement_events   enhancement_event[]
   subscriptions        subscription[]
-  created_enhancements enhancement[]       @relation("creator")
+  publishers           publisher_user[]
 }
 
 model author {
@@ -32,19 +32,63 @@ model author {
   user_id      String?   @unique
   user         user?     @relation(fields: [user_id], references: [id])
   books        book[]
+  publishers   publisher_author[]
+}
+
+enum PublisherType {
+  self_published
+  traditional
+}
+
+model publisher_author {
+  id              String    @id @default(uuid())
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  publisher_id    String
+  publisher       publisher @relation(fields: [publisher_id], references: [id])
+  author_id       String
+  author          author    @relation(fields: [author_id], references: [id])
+  active          Boolean   @default(true)
+}
+
+enum PublisherRole {
+  admin
+  user
+}
+
+model publisher_user {
+  id              String    @id @default(uuid())
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  role            PublisherRole
+  publisher_id    String
+  publisher       publisher @relation(fields: [publisher_id], references: [id])
+  user_id         String
+  user            user      @relation(fields: [user_id], references: [id])
+}
+
+model publisher {
+  id              String    @id @default(uuid())
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  name            String?
+  type            PublisherType
+  authors         publisher_author[]
+  users           publisher_user[]
+  books           book[]
+  enhancements    enhancement[] @relation("enhancement_publisher")
 }
 
 model book {
-  id                   String        @id @unique @default(uuid())
-  created_at           DateTime      @default(now()) @db.Timestamptz(6)
-  title                String
-  description          String?
-  cover_url            String?
-  asset_url            String?       @unique
+  id            String        @id @unique @default(uuid())
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  title         String
+  description   String?
+  cover_url     String?
+  asset_url     String?       @unique
+  authors       author[]
   author_names_cached  String?
-  authors              author[]
-  enhancements         enhancement[]
-  genres               genre[]
+  publishers    publisher[]
+  enhancements  enhancement[]
+  genres        genre[]
+  hashIndex     Json?
 }
 
 model genre {
@@ -59,18 +103,19 @@ enum EnhancementType {
 }
 
 model enhancement {
-  id                       String              @id @unique @default(uuid())
-  created_at               DateTime            @default(now()) @db.Timestamptz(6)
-  creator_id               String
-  creator                  user                @relation("creator", fields: [creator_id], references: [id])
-  title                    String
-  coalesced_data           Json?
-  coalesced_timestamp      DateTime?
-  book_id                  String
-  book                     book                @relation(fields: [book_id], references: [id])
-  included_types           EnhancementType[]
-  update_events            enhancement_event[] @relation("enhancement_events")
-  subscriptions            subscription[]
+  id                        String              @id @unique @default(uuid())
+  created_at                DateTime            @default(now()) @db.Timestamptz(6)
+  publisher_id              String?
+  publisher                 publisher?           @relation("enhancement_publisher", fields: [publisher_id], references: [id])
+  title                     String
+  coalesced_data            Json?
+  coalesced_timestamp       DateTime?
+  book_id                   String
+  book                      book                @relation(fields: [book_id], references: [id])
+  included_types            EnhancementType[]
+  update_events             enhancement_event[] @relation("enhancement_events")
+  subscriptions             subscription[]
+  grant_admin_to_publisher  Boolean?            @default(true)
 }
 
 model subscription {
@@ -95,8 +140,8 @@ model enhancement_event {
   operation           Json
   enhancement_id      String
   enhancement         enhancement   @relation("enhancement_events", fields: [enhancement_id], references: [id])
-  created_by_id       String
-  created_by          user          @relation(fields: [created_by_id], references: [id])
+  created_by_id       String?
+  created_by          user?          @relation(fields: [created_by_id], references: [id])
   type                EnhancementType
 }
 

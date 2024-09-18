@@ -1,5 +1,5 @@
 import { convertObjectPropertiesToCamelCase } from "../../utils";
-import { createEnhancementEvent } from '../../enhancements'
+import { createEnhancementEvent } from '../../services/enhancements'
 import { prisma } from "../prisma";
 
 enum OperationType {

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 
-import { AUTH_SECRET } from "./config"
-import { prisma } from "./prisma"
+import { AUTH_SECRET } from "../config"
+import { prisma } from "../prisma"
 
 const findUser = async (
   id: string,
