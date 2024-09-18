@@ -1,5 +1,5 @@
 import { convertObjectPropertiesToCamelCase } from "../../utils"
-import { prismaClient } from "../prismaClient"
+import { prisma } from "../prisma"
 
 export const resolvers = {
   Query: {
@@ -8,7 +8,7 @@ export const resolvers = {
         const offset = pagination?.offset || 0
         const limit = pagination?.limit || 50
 
-        const authors = await prismaClient.author.findMany({
+        const authors = await prisma.author.findMany({
           where: query ? {
             OR: [{
               display_name: { contains: query },
@@ -51,7 +51,7 @@ export const resolvers = {
 
   Mutation: {
     createAuthor: async (parent, args) => {
-      const author = await prismaClient.author.create({
+      const author = await prisma.author.create({
         data: {
           display_name: args.displayName,
         },
@@ -65,7 +65,7 @@ export const resolvers = {
     books: async (parent) => {
       const { id: authorId } = parent
 
-      const author = await prismaClient.author.findUnique({
+      const author = await prisma.author.findUnique({
         where: {
           id: authorId
         },

@@ -1,4 +1,4 @@
-import { useSharedState } from "@/providers/GlobalStateProvider"
+import { useSharedState } from "./useSharedState"
 
 export enum RIGHT_PANEL_STATE {
   CLOSED = 'CLOSED',

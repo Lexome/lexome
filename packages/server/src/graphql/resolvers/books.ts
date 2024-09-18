@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client"
 import { convertObjectPropertiesToCamelCase } from "../../utils"
-import { prismaClient } from "../prismaClient"
+import { prisma } from "../prisma"
 
 export const resolvers = {
   Query: {
@@ -11,7 +11,18 @@ export const resolvers = {
 
       if (query) {
         conditions.push({
-          title: { contains: query, mode: 'insensitive'}
+          OR: [{
+            title: { contains: query, mode: 'insensitive'},
+          }, {
+            authors: {
+              some: {
+                display_name: {
+                  contains: query,
+                  mode: 'insensitive'
+                }
+              }
+            }
+          }]
         })
       }
 
@@ -28,7 +39,7 @@ export const resolvers = {
       const limit = pagination?.limit || 50
       const offset = pagination?.offset || 0
 
-      const books = await prismaClient.book.findMany({
+      const books = await prisma.book.findMany({
         where: conditions ? {
           AND: conditions
         } : undefined,
@@ -48,7 +59,7 @@ export const resolvers = {
     },
 
     getBook: async (parent, { id }) => {
-      const book = await prismaClient.book.findUnique({
+      const book = await prisma.book.findUnique({
         where: { id },
       })
 
@@ -66,7 +77,7 @@ export const resolvers = {
       genres: string[],
 
     }) => {
-      const book = await prismaClient.book.create({
+      const book = await prisma.book.create({
         data: {
           title: args.title,
           description: args.description,
@@ -89,7 +100,7 @@ export const resolvers = {
     authors: async (parent) => {
       const { id } = parent
 
-      const book = await prismaClient.book.findUnique({
+      const book = await prisma.book.findUnique({
         where: { id },
         include: {
           authors: true
@@ -107,7 +118,7 @@ export const resolvers = {
 
     genres: async (parent) => {
       const { id } = parent
-      const genres = await prismaClient.genre.findMany({
+      const genres = await prisma.genre.findMany({
         where: {
           books: {
             some: {
@@ -122,7 +133,7 @@ export const resolvers = {
 
     enhancements: async (parent) => {
       const { id } = parent
-      const enhancements = await prismaClient.enhancement.findMany({
+      const enhancements = await prisma.enhancement.findMany({
         where: {
           book_id: id
         }

@@ -19,23 +19,25 @@ export const fontSizes = {
 }
 
 export enum FONT_WEIGHT {
-  REGULAR='regular',
+  NORMAL='normal',
   SEMI_BOLD='semi_bold',
   BOLD='bold'
 }
 
 export const fontWeights = {
-  [FONT_WEIGHT.REGULAR]: '400',
+  [FONT_WEIGHT.NORMAL]: '400',
   [FONT_WEIGHT.SEMI_BOLD]: '600',
   [FONT_WEIGHT.BOLD]: '700'
 }
 
 export enum FONT_FAMILY {
   SANS_SERIF = 'sansSerif',
+  HEADLINE = 'headline'
 }
 
 export const fontFamilies = {
-  [FONT_FAMILY.SANS_SERIF]: "Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif"
+  [FONT_FAMILY.SANS_SERIF]: "Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
+  [FONT_FAMILY.HEADLINE]: "Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif"
 }
 
 export enum LINE_HEIGHT {
@@ -54,46 +56,69 @@ export enum TYPOGRAPHY_TYPE {
   TEXT_SMALL='text_small',
   TEXT_MEDIUM='text_medium',
   TEXT_LARGE='text_large',
+
   PARAGRAPH_SMALL='paragraph_small',
   PARAGRAPH_MEDIUM='paragraph_medium',
   PARAGRAPH_LARGE='paragraph_large',
+
+  HEADLINE_SMALL='headline_small',
+  HEADLINE_MEDIUM='headline_medium',
+  HEADLINE_LARGE='headline_large'
 }
 
 export const typography = {
   [TYPOGRAPHY_TYPE.TEXT_SMALL]: {
     fontSize: FONT_SIZE.SM,
     lineHeight: LINE_HEIGHT.NORMAL,
-    fontWeight: FONT_WEIGHT.REGULAR,
+    fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.SANS_SERIF,
   },
   [TYPOGRAPHY_TYPE.TEXT_MEDIUM]: {
     fontSize: FONT_SIZE.MS,
     lineHeight: LINE_HEIGHT.NORMAL,
-    fontWeight: FONT_WEIGHT.REGULAR,
+    fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.SANS_SERIF,
   },
   [TYPOGRAPHY_TYPE.TEXT_LARGE]: {
     fontSize: FONT_SIZE.MD,
     lineHeight: LINE_HEIGHT.NORMAL,
-    fontWeight: FONT_WEIGHT.REGULAR,
+    fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.SANS_SERIF,
   },
   [TYPOGRAPHY_TYPE.PARAGRAPH_SMALL]: {
     fontSize: FONT_SIZE.SM,
     lineHeight: LINE_HEIGHT.RELAXED,
-    fontWeight: FONT_WEIGHT.REGULAR,
+    fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.SANS_SERIF,
   },
   [TYPOGRAPHY_TYPE.PARAGRAPH_MEDIUM]: {
     fontSize: FONT_SIZE.MS,
     lineHeight: LINE_HEIGHT.RELAXED,
-    fontWeight: FONT_WEIGHT.REGULAR,
+    fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.SANS_SERIF,
   },
   [TYPOGRAPHY_TYPE.PARAGRAPH_LARGE]: {
     fontSize: FONT_SIZE.MD,
     lineHeight: LINE_HEIGHT.RELAXED,
-    fontWeight: FONT_WEIGHT.REGULAR,
+    fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.SANS_SERIF,
+  },
+  [TYPOGRAPHY_TYPE.HEADLINE_SMALL]: {
+    fontSize: FONT_SIZE.MD,
+    lineHeight: LINE_HEIGHT.NORMAL,
+    fontWeight: FONT_WEIGHT.NORMAL,
+    fontFamily: FONT_FAMILY.HEADLINE,
+  },
+  [TYPOGRAPHY_TYPE.HEADLINE_MEDIUM]: {
+    fontSize: FONT_SIZE.ML,
+    lineHeight: LINE_HEIGHT.NORMAL,
+    fontWeight: FONT_WEIGHT.NORMAL,
+    fontFamily: FONT_FAMILY.HEADLINE,
+  },
+  [TYPOGRAPHY_TYPE.HEADLINE_LARGE]: {
+    fontSize: FONT_SIZE.LG,
+    lineHeight: LINE_HEIGHT.NORMAL,
+    fontWeight: FONT_WEIGHT.NORMAL,
+    fontFamily: FONT_FAMILY.HEADLINE,
   },
 }
