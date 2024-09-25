@@ -1,0 +1,57 @@
+<html>
+  <body>
+    <div id="text-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+
+    <script>
+      // INSERT_EPUBJS_HERE
+
+      window.readChaptersFromEpub = (params) => {
+        const { epubUrl } = params;
+        const epub = new ePub(epubUrl);
+
+        const chapters = []
+
+        let loadChaptersPromise = Promise.resolve();
+
+        epub.ready.then(() => {
+          const spineItems = epub.spine.items;
+
+          for (const item of spineItems) {
+            loadChaptersPromise = loadChaptersPromise
+              .then(() => {
+                return epub.load(item.href)
+              })
+              .then((resource) => {
+                const sections = Array.from(resource.getElementsByTagName('section'))
+                const chapterSections = sections
+                  .filter(section => (
+                    section.attributes['epub:type'] &&
+                    section.attributes['epub:type'].value &&
+                    (
+                      section.attributes['epub:type'].value.includes('chapter') ||
+                      section.attributes['epub:type'].value.includes('prologue') ||
+                      section.attributes['epub:type'].value.includes('epilogue')
+                    )
+                  ))
+                  .map(section => section.textContent)
+                  // Replace all whitespace that includes a newline with a single newline
+                  .map(section => section.replace(/[^\S\n]*\n+[^\S\n]*/g, '\n\n'))
+                  .map(section => section.replace(/\n+/g, '\n\n'))
+                  // Replace all whitespace that does not include a newline with a single space
+                  .map(section => section.replace(/[^\S\r\n]+/g, ' '))
+                chapters.push(...chapterSections)
+              })
+          }
+
+          // Write chapters to textContainer as JSON
+          loadChaptersPromise.then(() => {
+            const textContainer = document.getElementById('text-container');
+            textContainer.innerHTML = JSON.stringify(chapters);
+          })          
+        });
+      }
+    </script>
+  </body>
+  
+</html>

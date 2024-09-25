@@ -1,5 +1,5 @@
 import { EnhancementType } from "@prisma/client"
-import { summarySchema } from "./schemas/summary-v1";
+import { summarySchema } from "../schemas/summary-v1";
 
 type EnhancementTypeSpec = {
   [key in EnhancementType]: {

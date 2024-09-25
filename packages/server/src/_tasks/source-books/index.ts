@@ -1,9 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
-import { execSync } from "child_process";
-import { downloadBook, getEbookLinks } from "./scrapeStandardEbooks";
 import { findPackageRoot } from "../utils";
-import { prisma } from "../../client";
+import { prisma } from "../../prisma";
 
 const packageRoot = findPackageRoot()
 
@@ -218,8 +216,6 @@ const main = async () => {
       // fs.copyFileSync(coverPath, coverDestination)
     // }
   }
-
-
 
   // let skip = true
 

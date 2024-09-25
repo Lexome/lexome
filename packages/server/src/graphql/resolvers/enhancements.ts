@@ -1,14 +1,20 @@
-import { convertObjectPropertiesToCamelCase } from "../../utils";
-import { createEnhancementEvent } from '../../enhancements'
-import { prisma } from "../prisma";
+import { convertObjectPropertiesToCamelCase, convertObjectPropertiesToSnakeCase } from "../../utils";
+import { createEnhancement } from "../../services/enhancements/core/createEnhancement";
+import { prisma } from "../../prisma";
+import { coalesceEnhancementDataById } from "../../services/enhancements/core/coalesceEnhancementData";
+import { Resolvers } from "../../generated/graphql";
 
-enum OperationType {
-  add='add',
-  remove='remove',
-  replace='replace'
-}
+export const resolvers: Resolvers = {
+  Enhancement: {
+    coalescedData: async (parent) => {
+      const coalescedData = await coalesceEnhancementDataById({ id: parent.id })
 
-export const resolvers = {
+      return JSON.stringify(coalescedData) 
+    },
+    coalescedTimestamp: async () => {
+      return new Date().toISOString()
+    }
+  },
   Query: {
     getEnhancementsForBook: async (parent, args) => {
       const bookId = args.bookId;
@@ -20,6 +26,28 @@ export const resolvers = {
 
       return enhancements.map(convertObjectPropertiesToCamelCase);
     },
+
+    getSubscribedEnhancementsForBook: async (parent, args, context) => {
+      const bookId = args.bookId;
+      const user = context.user;
+
+      const enhancements = await prisma.enhancement.findMany({
+        where: {
+          subscriptions: {
+            some: {
+              user_id: user.id
+            }
+          },
+          book_id: bookId
+        }
+      })
+
+      for (const enhancement of enhancements) {
+      }
+
+      return enhancements.map(convertObjectPropertiesToCamelCase);
+    },
+
     getSubscriptions: async (parent, args, context) => {
       const bookId = args.bookId
 
@@ -37,7 +65,6 @@ export const resolvers = {
       }
 
       return subscriptions.map(convertObjectPropertiesToCamelCase);
-
     }
   },
   Mutation: {
@@ -45,6 +72,22 @@ export const resolvers = {
       const { enhancementId } = args;
       const role = args.role || 'user'
       const user = context.user;
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // If the user is already subscribed to the enhancement, return the existing subscription
+      const existingSubscription = await prisma.subscription.findFirst({
+        where: {
+          user_id: user.id,
+          enhancement_id: enhancementId
+        }
+      });
+
+      if (existingSubscription) {
+        return convertObjectPropertiesToCamelCase(existingSubscription);
+      }
 
       const subscription = await prisma.subscription.create({
         data: {
@@ -61,36 +104,39 @@ export const resolvers = {
       const { bookId, title, includedTypes } = args;
       const user = context.user;
 
-      const enhancement = await prisma.enhancement.create({
-        data: {
-          title,
-          book_id: bookId,
-          creator_id: user.id,
-          included_types: includedTypes
-        }
-      });
+      const enhancement = await createEnhancement({
+        bookId,
+        title,
+        includedTypes
+      })
 
       return convertObjectPropertiesToCamelCase(enhancement);
-    }
+    },
 
-    createEnhancementEvent: async (
-      _,
-      args,
-      context
-    ) => {
-      const user = context.user;
-      const {
-        enhancementId,
-        enhancementType,
-        operationType
-      } = args
+    // addEnhancementPatch: async (
+    //   _,
+    //   args,
+    //   context
+    // ) => {
+    //   const user = context.user;
+    //   const {
+    //     enhancementId,
+    //     enhancementType,
+    //     patch,
+    //     operationType,
+    //   } = args
 
-      createEnhancementEvent({
-        path: args.path,
-        enhancementId,
-        enhancementType,
-      });
-    }
+    //   await addEnhancementPatch({
+    //     patch,
+    //     enhancementId,
+    //     enhancementType,
+    //     userId: user.id,
+    //   });
+
+    //   return {
+    //     success: true,
+    //   }
+    // }
   },
 
 }
