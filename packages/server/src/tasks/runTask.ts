@@ -1,11 +1,10 @@
-import { copyFileSync } from 'fs'
 import path from 'path'
 
 const INVALID_COMMAND_ERROR = `
 run-task must be supplied with a command name matches a file in src/tasks/commands folder
 `
 
-const commandsFolder = path.join(__dirname, 'commands')
+const tasksFolder = path.join(__dirname)
 
 const main = async () => {
   const taskName = process.argv[2]
@@ -14,7 +13,7 @@ const main = async () => {
     console.log('run-task must be supplied with a command name that matches')
   }
 
-  const taskPath = path.join(commandsFolder, taskName)
+  const taskPath = path.join(tasksFolder, taskName)
 
 
   try {

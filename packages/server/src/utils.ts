@@ -5,6 +5,32 @@ const isObject = (value: any) => {
   return value && typeof value === 'object'
 }
 
+export const convertObjectPropertiesToSnakeCase = <T = any>(obj: any): T => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertObjectPropertiesToSnakeCase) as T;
+  }
+
+  const newObject: any = {}
+
+  for (const key in obj) {
+    const value = obj[key];
+
+    const newKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+
+    if (typeof value === 'object') {
+      newObject[newKey] = convertObjectPropertiesToSnakeCase(value);
+    } else {
+      newObject[newKey] = value;
+    }
+  }
+
+  return newObject as T
+}
+
 
 export const convertObjectPropertiesToCamelCase = <T = any>(obj: any): T  => {
   if (typeof obj !== 'object' || obj === null) {

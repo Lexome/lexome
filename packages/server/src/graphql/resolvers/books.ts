@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client"
 import { convertObjectPropertiesToCamelCase } from "../../utils"
-import { prisma } from "../prisma"
+import { prisma } from "../../prisma"
+import { GraphQLTypeResolver } from "graphql"
 
 export const resolvers = {
   Query: {

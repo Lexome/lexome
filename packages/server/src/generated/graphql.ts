@@ -21,7 +21,7 @@ export type Author = {
   books: Array<Book>;
   createdAt?: Maybe<Scalars['String']['output']>;
   displayName?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
   user?: Maybe<User>;
 };
 
@@ -58,34 +58,28 @@ export type BookFilters = {
 export type Enhancement = {
   __typename?: 'Enhancement';
   book: Book;
+  coalescedData: Scalars['String']['output'];
+  coalescedTimestamp: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
-  data: Scalars['String']['output'];
   id: Scalars['String']['output'];
   includedTypes: Array<EnhancementType>;
+  patches: Array<EnhancementPatch>;
   subscriptions: Array<Subscription>;
   title: Scalars['String']['output'];
-  updateEvents: Array<EnhancementEvent>;
 };
 
-export type EnhancementEvent = {
-  __typename?: 'EnhancementEvent';
+export type EnhancementPatch = {
+  __typename?: 'EnhancementPatch';
   createdAt: Scalars['String']['output'];
-  createdBy: User;
-  enhancement: Enhancement;
+  createdBy?: Maybe<User>;
   id: Scalars['String']['output'];
   operation: Scalars['String']['output'];
   type: EnhancementType;
 };
 
-export type EnhancementType = {
-  __typename?: 'EnhancementType';
-  createdAt: Scalars['String']['output'];
-  displayName: Scalars['String']['output'];
-  enhancementEvents: Array<EnhancementEvent>;
-  enhancements: Array<Enhancement>;
-  id: Scalars['String']['output'];
-  slug: Scalars['String']['output'];
-};
+export enum EnhancementType {
+  Summary = 'summary'
+}
 
 export type Genre = {
   __typename?: 'Genre';
@@ -99,6 +93,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   createAuthor?: Maybe<Author>;
   createBook?: Maybe<Book>;
+  createEnhancement?: Maybe<Enhancement>;
+  createSubscription?: Maybe<Subscription>;
   deleteBook?: Maybe<Book>;
 };
 
@@ -117,6 +113,19 @@ export type MutationCreateBookArgs = {
   description?: InputMaybe<Scalars['String']['input']>;
   genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   title: Scalars['String']['input'];
+};
+
+
+export type MutationCreateEnhancementArgs = {
+  bookId: Scalars['String']['input'];
+  includedTypes: Array<EnhancementType>;
+  title: Scalars['String']['input'];
+};
+
+
+export type MutationCreateSubscriptionArgs = {
+  enhancementId: Scalars['String']['input'];
+  role?: InputMaybe<Role>;
 };
 
 
@@ -141,6 +150,9 @@ export type Query = {
   getAuthors?: Maybe<AuthorConnection>;
   getBook?: Maybe<Book>;
   getBooks?: Maybe<BookConnection>;
+  getEnhancementsForBook: Array<Enhancement>;
+  getSubscribedEnhancementsForBook: Array<Enhancement>;
+  getSubscriptions: Array<Enhancement>;
 };
 
 
@@ -166,6 +178,21 @@ export type QueryGetBooksArgs = {
   query?: InputMaybe<Scalars['String']['input']>;
 };
 
+
+export type QueryGetEnhancementsForBookArgs = {
+  bookId: Scalars['String']['input'];
+};
+
+
+export type QueryGetSubscribedEnhancementsForBookArgs = {
+  bookId: Scalars['String']['input'];
+};
+
+
+export type QueryGetSubscriptionsArgs = {
+  bookId?: InputMaybe<Scalars['String']['input']>;
+};
+
 export enum Role {
   Admin = 'admin',
   User = 'user'
@@ -183,7 +210,7 @@ export type Subscription = {
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['String']['output'];
-  enhancementEvents: Array<EnhancementEvent>;
+  enhancementPatches: Array<EnhancementPatch>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isAdmin: Scalars['Boolean']['output'];
@@ -272,8 +299,8 @@ export type ResolversTypes = {
   BookFilters: BookFilters;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Enhancement: ResolverTypeWrapper<Enhancement>;
-  EnhancementEvent: ResolverTypeWrapper<EnhancementEvent>;
-  EnhancementType: ResolverTypeWrapper<EnhancementType>;
+  EnhancementPatch: ResolverTypeWrapper<EnhancementPatch>;
+  EnhancementType: EnhancementType;
   Genre: ResolverTypeWrapper<Genre>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -295,8 +322,7 @@ export type ResolversParentTypes = {
   BookFilters: BookFilters;
   Boolean: Scalars['Boolean']['output'];
   Enhancement: Enhancement;
-  EnhancementEvent: EnhancementEvent;
-  EnhancementType: EnhancementType;
+  EnhancementPatch: EnhancementPatch;
   Genre: Genre;
   Int: Scalars['Int']['output'];
   Mutation: {};
@@ -312,7 +338,7 @@ export type AuthorResolvers<ContextType = any, ParentType extends ResolversParen
   books?: Resolver<Array<ResolversTypes['Book']>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -344,33 +370,23 @@ export type BookConnectionResolvers<ContextType = any, ParentType extends Resolv
 
 export type EnhancementResolvers<ContextType = any, ParentType extends ResolversParentTypes['Enhancement'] = ResolversParentTypes['Enhancement']> = {
   book?: Resolver<ResolversTypes['Book'], ParentType, ContextType>;
+  coalescedData?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  coalescedTimestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  data?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   includedTypes?: Resolver<Array<ResolversTypes['EnhancementType']>, ParentType, ContextType>;
+  patches?: Resolver<Array<ResolversTypes['EnhancementPatch']>, ParentType, ContextType>;
   subscriptions?: Resolver<Array<ResolversTypes['Subscription']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updateEvents?: Resolver<Array<ResolversTypes['EnhancementEvent']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type EnhancementEventResolvers<ContextType = any, ParentType extends ResolversParentTypes['EnhancementEvent'] = ResolversParentTypes['EnhancementEvent']> = {
+export type EnhancementPatchResolvers<ContextType = any, ParentType extends ResolversParentTypes['EnhancementPatch'] = ResolversParentTypes['EnhancementPatch']> = {
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  enhancement?: Resolver<ResolversTypes['Enhancement'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operation?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['EnhancementType'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type EnhancementTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['EnhancementType'] = ResolversParentTypes['EnhancementType']> = {
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  displayName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  enhancementEvents?: Resolver<Array<ResolversTypes['EnhancementEvent']>, ParentType, ContextType>;
-  enhancements?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -385,6 +401,8 @@ export type GenreResolvers<ContextType = any, ParentType extends ResolversParent
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<MutationCreateAuthorArgs, 'displayName'>>;
   createBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationCreateBookArgs, 'title'>>;
+  createEnhancement?: Resolver<Maybe<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<MutationCreateEnhancementArgs, 'bookId' | 'includedTypes' | 'title'>>;
+  createSubscription?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType, RequireFields<MutationCreateSubscriptionArgs, 'enhancementId'>>;
   deleteBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationDeleteBookArgs, 'id'>>;
 };
 
@@ -399,6 +417,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getAuthors?: Resolver<Maybe<ResolversTypes['AuthorConnection']>, ParentType, ContextType, Partial<QueryGetAuthorsArgs>>;
   getBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<QueryGetBookArgs, 'id'>>;
   getBooks?: Resolver<Maybe<ResolversTypes['BookConnection']>, ParentType, ContextType, Partial<QueryGetBooksArgs>>;
+  getEnhancementsForBook?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<QueryGetEnhancementsForBookArgs, 'bookId'>>;
+  getSubscribedEnhancementsForBook?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<QueryGetSubscribedEnhancementsForBookArgs, 'bookId'>>;
+  getSubscriptions?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType, Partial<QueryGetSubscriptionsArgs>>;
 };
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
@@ -411,7 +432,7 @@ export type SubscriptionResolvers<ContextType = any, ParentType extends Resolver
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  enhancementEvents?: Resolver<Array<ResolversTypes['EnhancementEvent']>, ParentType, ContextType>;
+  enhancementPatches?: Resolver<Array<ResolversTypes['EnhancementPatch']>, ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   isAdmin?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -429,8 +450,7 @@ export type Resolvers<ContextType = any> = {
   Book?: BookResolvers<ContextType>;
   BookConnection?: BookConnectionResolvers<ContextType>;
   Enhancement?: EnhancementResolvers<ContextType>;
-  EnhancementEvent?: EnhancementEventResolvers<ContextType>;
-  EnhancementType?: EnhancementTypeResolvers<ContextType>;
+  EnhancementPatch?: EnhancementPatchResolvers<ContextType>;
   Genre?: GenreResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;

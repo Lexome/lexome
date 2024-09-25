@@ -15,6 +15,7 @@ type Query {
     pagination: Pagination
   ): BookConnection
   getBook(id: String!): Book
+
   getAuthors(
     query: String,
     pagination: Pagination
@@ -23,6 +24,7 @@ type Query {
 
   getEnhancementsForBook(bookId: String!): [Enhancement!]!
   getSubscriptions(bookId: String): [Enhancement!]!
+  getSubscribedEnhancementsForBook(bookId: String!): [Enhancement!]!
 
   #getGenres: [Genre!]!
   #getGenre(id: String!): Genre
@@ -48,6 +50,7 @@ type Mutation {
   #  genres: [String],
   #): Book
   deleteBook(id: String!): Book
+
   createAuthor(
     userId: String,
     displayName: String!,
@@ -61,19 +64,12 @@ type Mutation {
   #deleteAuthor(id: String!): Author
 
   createSubscription(enhancementId: String!, role: Role): Subscription
+
   createEnhancement(
     title: String!,
     bookId: String!,
-    includedTypes: [String],
+    includedTypes: [EnhancementType!]!,
   ): Enhancement
-  createEnhancementEvent(
-    operationType
-    path: [String!]!,
-    enhancementId: String!,
-
-
-
-  )
 
   #createGenre(
   #  name: String!,
@@ -122,12 +118,6 @@ type Mutation {
   # deleteEnhancementEvent(id: String!): EnhancementEvent
 }
 
-enum OperationType {
-  add
-  remove
-  replace
-}
-
 type User {
   id: String!
   createdAt: String!
@@ -137,12 +127,12 @@ type User {
   isAdmin: Boolean!
   phone: String
   verificationCode: String
-  enhancementEvents: [EnhancementEvent!]!
+  enhancementPatches: [EnhancementPatch!]!
   subscriptions: [Subscription!]!
 }
 
 type Author {
-  id: String
+  id: String!
   createdAt: String
   user: User
   displayName: String
@@ -187,11 +177,12 @@ type Enhancement {
   id: String!
   createdAt: String!
   title: String!
-  data: String!
   book: Book!
   includedTypes: [EnhancementType!]!
-  updateEvents: [EnhancementEvent!]!
   subscriptions: [Subscription!]!
+  coalescedData: String!
+  coalescedTimestamp: String!
+  patches: [EnhancementPatch!]!
 }
 
 type Subscription {
@@ -207,20 +198,14 @@ enum Role {
   user
 }
 
-type EnhancementEvent {
+type EnhancementPatch {
   id: String!
   createdAt: String!
   operation: String!
-  enhancement: Enhancement!
-  createdBy: User!
+  createdBy: User
   type: EnhancementType!
 }
 
-type EnhancementType {
-  id: String!
-  createdAt: String!
-  slug: String!
-  displayName: String!
-  enhancements: [Enhancement!]!
-  enhancementEvents: [EnhancementEvent!]!
+enum EnhancementType {
+  summary
 }

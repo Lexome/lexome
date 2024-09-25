@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "files": [
+    "dist/services/enhancements/schemas/*",
+    "dist/services/enhancements/core/validateEnhancementPatch.js",
+    "dist/services/enhancements/core/buildEnhancementPatch.js"
+  ],
   "scripts": {
     "compile": "tsc",
     "compile-tasks": "tsc --build tsconfig.tasks.json",

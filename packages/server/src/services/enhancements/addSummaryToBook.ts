@@ -2,7 +2,8 @@ import { EnhancementType } from "@prisma/client"
 import { prisma } from "../../prisma"
 import { Summary } from "./schemas/summary-v1"
 import { createEnhancement } from "./core/createEnhancement"
-import { addEnhancementEvent } from "./core/addEnhancementEvent"
+import { buildEnhancementPatch } from "./core/buildEnhancementPatch"
+import { addEnhancementPatch } from "./core/addEnhancementPatch"
 
 export const addSummaryToBook = async (params: {
   bookId: string,
@@ -26,14 +27,19 @@ export const addSummaryToBook = async (params: {
     title: `${book.title} Summary`,
   })
 
-  await addEnhancementEvent({
-    enhancementId: enhancement.id,
+  const patch = buildEnhancementPatch({
     enhancementType: EnhancementType.summary,
     operation: {
       op: 'replace',
       value: summary.chunks,
     },
     path: ['chunks'],
+  })
+
+  await addEnhancementPatch({
+    enhancementId: enhancement.id,
+    enhancementType: EnhancementType.summary,
+    patch,
     userId: 'SUPER_USER',
   })
 }

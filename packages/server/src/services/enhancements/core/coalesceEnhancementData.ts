@@ -1,23 +1,23 @@
 import { enhancement as Enhancement } from "@prisma/client"
-import { applyPatch, Operation } from 'fast-json-patch'
 
 import { enhancementTypeSpecs } from "./enhancementTypeSpecs"
 import { prisma } from "../../../prisma"
+import { applyEnhancementPatches } from './applyEnhancementPatches'
+import { convertDbPatchToGqlFormat } from "./convertDbPatchToGqlFormat"
+
+
 
 export const coalesceEnhancementData = async (params: {
   enhancement: Enhancement,
   save?: boolean,
 }) => {
   const { enhancement, save } = params
-  const types = enhancement.included_types
-
-  const typeSpecs = types.map((type) => enhancementTypeSpecs[type])
 
   const initialCoalescedData = enhancement.coalesced_data
-  const coalescedData = typeof initialCoalescedData === 'object' ? { ...initialCoalescedData } : {}
+  let coalescedData = typeof initialCoalescedData === 'object' ? { ...initialCoalescedData } : {}
   const lastCoalescedTimestamp = enhancement.coalesced_timestamp
 
-  const newEvents = await prisma.enhancement_event.findMany({
+  const newPatches = await prisma.enhancement_patch.findMany({
     where: {
       enhancement_id: enhancement.id,
       created_at: {
@@ -26,17 +26,12 @@ export const coalesceEnhancementData = async (params: {
     },
   })
 
-  for (const type of typeSpecs) {
-    const coalescedDataForType = coalescedData[type.slug] || {}
+  console.log('newPatches', newPatches)
 
-    const typeEvents = newEvents.filter((e) => e.type === type.slug)
-
-    if (typeEvents.length > 0) {
-      applyPatch(coalescedDataForType, typeEvents.map(e => e.operation as unknown as Operation))
-    }
-
-    coalescedData[type.slug] = coalescedDataForType
-  }
+  coalescedData = applyEnhancementPatches({
+    patches: newPatches.map(patch => convertDbPatchToGqlFormat({ patch })),
+    data: coalescedData
+  })
 
   if (save) {
     await prisma.enhancement.update({
@@ -51,4 +46,26 @@ export const coalesceEnhancementData = async (params: {
   }
 
   return coalescedData
+}
+
+export const coalesceEnhancementDataById = async (params: {
+  id: string
+}) => {
+  const { id } = params
+
+  const enhancement = await prisma.enhancement.findUnique({
+    where: {
+      id
+    }
+  })
+
+  console.log('enhancement', enhancement)
+
+  if (!enhancement) {
+    throw new Error('Enhancement not found')
+  }
+
+  return coalesceEnhancementData({
+    enhancement,
+  })
 }

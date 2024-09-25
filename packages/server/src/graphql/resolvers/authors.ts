@@ -1,7 +1,8 @@
 import { convertObjectPropertiesToCamelCase } from "../../utils"
-import { prisma } from "../prisma"
+import { prisma } from "../../prisma"
+import { Resolvers } from '../../generated/graphql'
 
-export const resolvers = {
+export const resolvers: Resolvers = {
   Query: {
     getAuthors: async (_, { query, pagination }) => {
       try {
@@ -31,10 +32,7 @@ export const resolvers = {
           }
         }
       } catch (e) {
-        console.log('here!')
-        console.error(e)
-
-        return []
+        throw e 
       }
     },
 

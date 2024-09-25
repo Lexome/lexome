@@ -20,7 +20,7 @@ model user {
   author               author?
   phone                String?             @unique
   verification_code    String?
-  enhancement_events   enhancement_event[]
+  enhancement_patches  enhancement_patch[]
   subscriptions        subscription[]
   publishers           publisher_user[]
 }
@@ -113,7 +113,7 @@ model enhancement {
   book_id                   String
   book                      book                @relation(fields: [book_id], references: [id])
   included_types            EnhancementType[]
-  update_events             enhancement_event[] @relation("enhancement_events")
+  patches                   enhancement_patch[] @relation("enhancement_patches")
   subscriptions             subscription[]
   grant_admin_to_publisher  Boolean?            @default(true)
 }
@@ -134,12 +134,12 @@ enum Role {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model enhancement_event {
+model enhancement_patch {
   id                  String        @id @default(uuid())
   created_at          DateTime      @default(now()) @db.Timestamptz(6)
   operation           Json
   enhancement_id      String
-  enhancement         enhancement   @relation("enhancement_events", fields: [enhancement_id], references: [id])
+  enhancement         enhancement   @relation("enhancement_patches", fields: [enhancement_id], references: [id])
   created_by_id       String?
   created_by          user?          @relation(fields: [created_by_id], references: [id])
   type                EnhancementType
