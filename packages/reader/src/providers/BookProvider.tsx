@@ -1,17 +1,26 @@
+import { EnhancementType } from '@lexome/core'
+
 import { useBookAsset } from "@/hooks/data/useBookAsset"
-import { LEFT_PANEL_STATE, RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } from "@/hooks/usePanel"
+import { useSubscribedEnhancements } from "@/hooks/data/useSubscribedEnhancements"
+import { RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } from "@/hooks/usePanel"
 import { useQueryParams } from "@/hooks/useQueryParams"
 import ePub, { Book, Rendition } from 'epubjs'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 
 const MAX_READABLE_WIDTH = 650
 
+type Enhancement = {
+  id: string,
+  type: EnhancementType,
+}
+
 const BookContext = createContext<{
   isLoading: boolean,
   book?: Book,
   setBook: (book: Book) => void,
   rendition?: Rendition,
-  setRendition: (rendition: Rendition) => void
+  setRendition: (rendition: Rendition) => void,
+
 }>({
   isLoading: true,
   setBook: () => {},
@@ -62,8 +71,18 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
   const [book, setBook] = useState<Book | undefined>()
   const [_, setRightPanelState] = useRightPanel()
   const [rendition, setRendition] = useState<Rendition | undefined>()
-  // const [selectedRange, setSelectedRange] = useState<string | undefined>()
-  // const [selectedParagraph, setSelectedParagraph] = useState<string | undefined>()
+
+  const {data: subscribedEnhancementsData} = useSubscribedEnhancements({
+    bookId: bookId as string
+  })
+
+  const subscribedEnhancements = useMemo(() => {
+    const subscribedEnhancements = subscribedEnhancementsData?.getSubscribedEnhancementsForBook || []
+    return subscribedEnhancements.map((enhancement) => {
+      const {coalescedData} = enhancement
+      return JSON.parse(coalescedData)
+    })
+  }, [subscribedEnhancementsData])
 
   const readerDimensions = useReaderDimensions()
 

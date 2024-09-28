@@ -108,5 +108,10 @@
     "outDir": "dist",
     "declaration": true,
   },
-  "include": ["src/graphql/**/*.ts"],
+  "include": [
+    "src/schemas/**/*.ts",
+    "src/export.ts",
+    "src/generated/**/*.ts",
+    "src/services/**/*.ts"
+  ],
 }
