@@ -1,4 +1,4 @@
-import { EnhancementType } from "@prisma/client"
+import { EnhancementType } from "../../../generated/graphql"
 import { summarySchema } from "../schemas/summary-v1";
 
 type EnhancementTypeSpec = {
@@ -10,8 +10,8 @@ type EnhancementTypeSpec = {
 }
 
 export const enhancementTypeSpecs: EnhancementTypeSpec = {
-  [EnhancementType.summary]: {
-    slug: EnhancementType.summary,
+  [EnhancementType.Summary]: {
+    slug: EnhancementType.Summary,
     schema: summarySchema,
     displayName: "Summary",
   },

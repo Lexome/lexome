@@ -1,4 +1,4 @@
-import { EnhancementType } from "@prisma/client"
+import { EnhancementType } from "../../../generated/graphql"
 import { applyOperation, Operation } from "fast-json-patch"
 import { enhancementTypeSpecs } from "./enhancementTypeSpecs"
 

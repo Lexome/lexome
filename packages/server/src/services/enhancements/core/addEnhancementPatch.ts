@@ -1,4 +1,5 @@
-import { EnhancementType, Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client"
+import { EnhancementType } from "../../../generated/graphql"
 import { prisma } from "../../../prisma"
 import { Operation } from "fast-json-patch"
 import { coalesceEnhancementData } from "./coalesceEnhancementData"
@@ -28,7 +29,7 @@ export async function addEnhancementPatch(params: {
   }
 
   // Make sure specified enhancement type is included in the enhancement
-  const enhancementType = enhancement.included_types.find((t) => t === _enhancementType)
+  const enhancementType = enhancement.included_types.find((t) => t === _enhancementType) as EnhancementType | undefined
 
   if (!enhancementType) {
     throw new Error('Enhancement type not found')
@@ -54,7 +55,7 @@ export async function addEnhancementPatch(params: {
     await validateEnhancementPatch({
       enhancementData,
       patch,
-      enhancementType,
+      enhancementType
     })
 
     await prisma.enhancement_patch.create({

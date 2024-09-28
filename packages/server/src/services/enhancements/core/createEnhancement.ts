@@ -1,4 +1,4 @@
-import { EnhancementType, publisher, Role } from "@prisma/client"
+import { EnhancementType, Role } from "../../../generated/graphql"
 import { prisma } from "../../../prisma"
 
 export const createEnhancement = async (params: {
@@ -47,7 +47,7 @@ export const createEnhancement = async (params: {
       data: {
         user_id: userId,
         enhancement_id: enhancement.id,
-        role: Role.admin,
+        role: Role.Admin,
       },
     })
   }

@@ -1,4 +1,4 @@
-import { EnhancementType } from "@prisma/client"
+import { EnhancementType } from "../../generated/graphql"
 import { prisma } from "../../prisma"
 import { Summary } from "./schemas/summary-v1"
 import { createEnhancement } from "./core/createEnhancement"
@@ -23,12 +23,12 @@ export const addSummaryToBook = async (params: {
 
   const enhancement = await createEnhancement({
     bookId,
-    includedTypes: [EnhancementType.summary],
+    includedTypes: [EnhancementType.Summary],
     title: `${book.title} Summary`,
   })
 
   const patch = buildEnhancementPatch({
-    enhancementType: EnhancementType.summary,
+    enhancementType: EnhancementType.Summary,
     operation: {
       op: 'replace',
       value: summary.chunks,
@@ -38,7 +38,7 @@ export const addSummaryToBook = async (params: {
 
   await addEnhancementPatch({
     enhancementId: enhancement.id,
-    enhancementType: EnhancementType.summary,
+    enhancementType: EnhancementType.Summary,
     patch,
     userId: 'SUPER_USER',
   })

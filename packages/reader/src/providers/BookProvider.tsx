@@ -139,7 +139,8 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
         book,
         setBook,
         rendition,
-        setRendition
+        setRendition,
+        isLoading
       }}
     >
       {children}
