@@ -1,6 +1,6 @@
 import { EnhancementType } from "../../../generated/graphql"
 import { Operation } from "fast-json-patch"
-import { Schemas } from "../schemas"
+import { Enhancements } from "../schemas"
 
 type DistributiveOmit<T, K extends keyof any> = T extends any
   ? Omit<T, K>
@@ -23,7 +23,7 @@ const transformOperation = (params: {
 
 export function buildEnhancementPatch<
   Type extends EnhancementType,
-  Shape extends Schemas[Type],
+  Shape extends Enhancements[Type],
   A extends keyof Shape,
   B extends keyof Shape[A]=never,
   C extends keyof Shape[A][B]=never,

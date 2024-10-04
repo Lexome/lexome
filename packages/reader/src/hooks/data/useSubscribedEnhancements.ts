@@ -2,21 +2,23 @@ import request from "graphql-request"
 import { graphql } from "../../../gql"
 import { GRAPHQL_ENDPOINT } from "@/config"
 import { useQuery } from "@tanstack/react-query"
+import { useBook } from "@/providers/BookProvider"
+import { useQueryParams } from "../useQueryParams"
 
 const subscribedEnhancementsQuery = graphql(`
   query GetEnhancements($bookId: String!) {
     getSubscribedEnhancementsForBook(bookId: $bookId) {
       coalescedData
+      includedTypes
+      id
     }
   }
 `)
 
 const SUBSCRIBED_ENHANCEMENTS_QUERY_KEY = 'subscribed-enhancements'
 
-export const useSubscribedEnhancements = (params: {
-  bookId: string
-}) => {
-  const { bookId } = params
+export const useSubscribedEnhancements = () => {
+  const { bookId } = useQueryParams()
 
   if (!bookId) {
     return {

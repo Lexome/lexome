@@ -1,6 +1,10 @@
 import { EnhancementType } from "../../../generated/graphql"
-import { Summary } from "./summary-v1"
+import { Summary, summarySchema } from "./summary-v1"
 
-export type Schemas = {
+export type Enhancements = {
   [EnhancementType.Summary]: Summary
+}
+
+export const schemas = {
+  [EnhancementType.Summary]: summarySchema
 }

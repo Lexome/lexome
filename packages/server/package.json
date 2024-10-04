@@ -1,7 +1,7 @@
 {
   "name": "@lexome/core",
   "private": false,
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "",
   "main": "dist/export.js",
   "files": [

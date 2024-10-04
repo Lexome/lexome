@@ -4,3 +4,4 @@ scraped/
 dist/
 processed/
 .env
+**/.npmrc

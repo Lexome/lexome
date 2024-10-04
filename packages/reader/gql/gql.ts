@@ -14,8 +14,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\nquery GetBookAsset($id: String!) {\n  getBook(id: $id) {\n    assetUrl\n  }\n}\n": types.GetBookAssetDocument,
-    "\n  query GetEnhancements($bookId: String!) {\n    getSubscribedEnhancementsForBook(bookId: $bookId) {\n      coalescedData\n    }\n  }\n": types.GetEnhancementsDocument,
     "\nquery ListStoryBooks($query: String, $pagination: Pagination) {\n  getBooks(query: $query, pagination: $pagination) {\n    pageInfo {\n      hasMore\n      offset\n    }\n    records {\n      id\n      title\n      coverUrl\n      description\n      authors {\n        id\n        displayName\n      }\n    }\n  }\n}\n": types.ListStoryBooksDocument,
+    "\n  query GetEnhancements($bookId: String!) {\n    getSubscribedEnhancementsForBook(bookId: $bookId) {\n      coalescedData\n      includedTypes\n      id\n    }\n  }\n": types.GetEnhancementsDocument,
 };
 
 /**
@@ -39,11 +39,11 @@ export function graphql(source: "\nquery GetBookAsset($id: String!) {\n  getBook
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetEnhancements($bookId: String!) {\n    getSubscribedEnhancementsForBook(bookId: $bookId) {\n      coalescedData\n    }\n  }\n"): (typeof documents)["\n  query GetEnhancements($bookId: String!) {\n    getSubscribedEnhancementsForBook(bookId: $bookId) {\n      coalescedData\n    }\n  }\n"];
+export function graphql(source: "\nquery ListStoryBooks($query: String, $pagination: Pagination) {\n  getBooks(query: $query, pagination: $pagination) {\n    pageInfo {\n      hasMore\n      offset\n    }\n    records {\n      id\n      title\n      coverUrl\n      description\n      authors {\n        id\n        displayName\n      }\n    }\n  }\n}\n"): (typeof documents)["\nquery ListStoryBooks($query: String, $pagination: Pagination) {\n  getBooks(query: $query, pagination: $pagination) {\n    pageInfo {\n      hasMore\n      offset\n    }\n    records {\n      id\n      title\n      coverUrl\n      description\n      authors {\n        id\n        displayName\n      }\n    }\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nquery ListStoryBooks($query: String, $pagination: Pagination) {\n  getBooks(query: $query, pagination: $pagination) {\n    pageInfo {\n      hasMore\n      offset\n    }\n    records {\n      id\n      title\n      coverUrl\n      description\n      authors {\n        id\n        displayName\n      }\n    }\n  }\n}\n"): (typeof documents)["\nquery ListStoryBooks($query: String, $pagination: Pagination) {\n  getBooks(query: $query, pagination: $pagination) {\n    pageInfo {\n      hasMore\n      offset\n    }\n    records {\n      id\n      title\n      coverUrl\n      description\n      authors {\n        id\n        displayName\n      }\n    }\n  }\n}\n"];
+export function graphql(source: "\n  query GetEnhancements($bookId: String!) {\n    getSubscribedEnhancementsForBook(bookId: $bookId) {\n      coalescedData\n      includedTypes\n      id\n    }\n  }\n"): (typeof documents)["\n  query GetEnhancements($bookId: String!) {\n    getSubscribedEnhancementsForBook(bookId: $bookId) {\n      coalescedData\n      includedTypes\n      id\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

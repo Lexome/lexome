@@ -1,4 +1,4 @@
-import { EnhancementType } from '@lexome/core'
+import { EnhancementType, Enhancements } from '@lexome/core'
 
 import { useBookAsset } from "@/hooks/data/useBookAsset"
 import { useSubscribedEnhancements } from "@/hooks/data/useSubscribedEnhancements"
@@ -11,7 +11,8 @@ const MAX_READABLE_WIDTH = 650
 
 type Enhancement = {
   id: string,
-  type: EnhancementType,
+  includedTypes: EnhancementType[],
+  data: Partial<Enhancements>
 }
 
 const BookContext = createContext<{
@@ -19,12 +20,13 @@ const BookContext = createContext<{
   book?: Book,
   setBook: (book: Book) => void,
   rendition?: Rendition,
+  subscribedEnhancements: Enhancement[],
   setRendition: (rendition: Rendition) => void,
-
 }>({
   isLoading: true,
   setBook: () => {},
-  setRendition: () => {}
+  setRendition: () => {},
+  subscribedEnhancements: []
 })
 
 const useReaderDimensions = () => {
@@ -72,15 +74,22 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
   const [_, setRightPanelState] = useRightPanel()
   const [rendition, setRendition] = useState<Rendition | undefined>()
 
-  const {data: subscribedEnhancementsData} = useSubscribedEnhancements({
-    bookId: bookId as string
-  })
+  const {data: subscribedEnhancementsData} = useSubscribedEnhancements()
 
-  const subscribedEnhancements = useMemo(() => {
+  const subscribedEnhancements: Enhancement[] = useMemo(() => {
     const subscribedEnhancements = subscribedEnhancementsData?.getSubscribedEnhancementsForBook || []
     return subscribedEnhancements.map((enhancement) => {
-      const {coalescedData} = enhancement
-      return JSON.parse(coalescedData)
+      const {
+        coalescedData,
+        includedTypes,
+        id
+      } = enhancement
+
+      return {
+        id,
+        includedTypes,
+        data: JSON.parse(coalescedData)
+      }
     })
   }, [subscribedEnhancementsData])
 
@@ -105,13 +114,34 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
       // flow: 'scrolled-doc'
     });
 
+    rendition.on('relocated', () => {
+      const wordsStart = rendition?.location.start.cfi
+      const wordsEnd = rendition?.location.end.cfi
+
+      const contents: any = rendition.getContents()
+      for (const content of contents) {
+        const range = content.cfiRangeToDomRange(wordsStart, wordsEnd)
+      }
+    })
+
     rendition.themes.register("main",
       {
         "p": {
           "margin-top": "8px",
           "font-size": "18px",
           "line-height": "1.5",
+          "margin-bottom": "16px",
           "color": '#555555',
+          "font-family": 'Inter, sans-serif',
+          "text-align": "justify",
+          "text-indent": "0"
+        },
+        "strong": {
+          "font-weight": "bold",
+          "font-family": 'Inter, sans-serif',
+          "font-size": "18px",
+          "font-variant": "normal",
+          "text-transform": "uppercase",
         }
       }
     );
@@ -159,6 +189,7 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
         setBook,
         rendition,
         setRendition,
+        subscribedEnhancements,
         isLoading
       }}
     >

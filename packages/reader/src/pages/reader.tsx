@@ -11,6 +11,7 @@ import {
 } from '@/hooks/usePanel'
 import { BookProvider, useBook } from '@/providers/BookProvider'
 import { Button, BUTTON_TYPE } from '../components/design-system/Button';
+import { PanelContents } from '@/components/panel/PanelContents';
 
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
@@ -18,8 +19,6 @@ import { styled } from '@/theme';
 import { useDrag } from '@use-gesture/react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PreventSsr } from '@/components/PreventSsr';
-import { ButtonSliderMenu } from '@/components/design-system/ButtonSliderMenu';
-import { Column } from '@/components/design-system/Column';
 
 // const slideIn = stylex.keyframes({
 //   '0%': {transform: 'translateX(0%)'},
@@ -259,13 +258,16 @@ const Reader = () => {
 
       if (reachedThreshold && mx > 0) {
         setLeftPanelState(LEFT_PANEL_STATE.EXPANDED)
+
       } else if (reachedThreshold && mx < 0) {
         setLeftPanelState(LEFT_PANEL_STATE.CLOSED)
+
       } else if (leftPanelState === LEFT_PANEL_STATE.EXPANDED) {
         animateSlide({
           panelId: PANEL_ID.LEFT,
           to: 300
         })
+
       } else if (leftPanelState === LEFT_PANEL_STATE.CLOSED) {
         animateSlide({
           panelId: PANEL_ID.LEFT,
@@ -347,23 +349,7 @@ const Reader = () => {
           {...getRightSliderProps()}
         >
           <RightPanel panelWidth={rightPanelPx}>
-            <Column px={3} py={4}>
-              <Row
-                style={{
-                  width: '100%',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <ButtonSliderMenu
-                  value="test"
-                  options={[
-                    { label: 'Summary', value: 'test' },
-                    { label: 'Voice', value: 'test2' }
-                  ]}
-                  onChange={() => {}}
-                />
-              </Row>
-            </Column>
+            <PanelContents />
           </RightPanel>
         </RightPanelTouchContainer>
       </Row>
@@ -443,7 +429,7 @@ export default function() {
   return (
     <PreventSsr>
       <main>
-        <BookProvider bookId={bookId}>
+        <BookProvider bookId={bookId || ''}>
           <Reader />
         </BookProvider>
       </main>
