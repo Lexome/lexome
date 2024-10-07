@@ -6,6 +6,7 @@
   "main": "dist/export.js",
   "files": [
     "dist/export.*",
+    "dist/services/hash.*",
     "dist/services/enhancements/schemas/*",
     "dist/services/enhancements/core/validateEnhancementPatch.*",
     "dist/services/enhancements/core/buildEnhancementPatch.*",

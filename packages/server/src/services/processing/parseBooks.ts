@@ -18,23 +18,23 @@ export const createChapterChunks = (params: {
   return chunks;
 }
 
-export const createChapterHashes = (params: {
+export const createChapterHashes = async (params: {
   chapters: string[];
 }) => {
   const { chapters } = params;
   const hashes: Hash[][] = [];
 
   for (const chapter of chapters) {
-    const hashesForChapter = createHashes({ text: chapter });
+    const hashesForChapter = await createHashes({ text: chapter });
     hashes.push(hashesForChapter);
   }
 
   return hashes;
 }
 
-export const createOrderedHashForChapters = (params: {
+export const createOrderedHashForChapters = async (params: {
   chapters: string[]
-}): {
+}): Promise<{
   prefixHashOrdering: {
     [key: string]: number[]
   },
@@ -42,7 +42,7 @@ export const createOrderedHashForChapters = (params: {
     [key: string]: number[]
   },
   hashArray: Hash[],
-} => {
+}> => {
   const { chapters } = params;
 
   const prefixHashOrdering: {
@@ -57,7 +57,7 @@ export const createOrderedHashForChapters = (params: {
   let endHashIndex = 0;
 
   for (const chapter of chapters) {
-    const hashes = createHashes({ text: chapter });
+    const hashes = await createHashes({ text: chapter });
 
     for (const hash of hashes) {
       if (hash.prefixHash) {
@@ -140,18 +140,18 @@ export const saveHashOrderingForBook = async (params: {
     prefixHashOrdering,
     suffixHashOrdering,
     hashArray,
-  } = createOrderedHashForChapters({ chapters });
+  } = await createOrderedHashForChapters({ chapters });
 
-  await prisma.book.update({
-    where: {
-      id: bookId
-    },
-    data: {
-      hashIndex: JSON.stringify({
-        prefixHashOrdering: prefixHashOrdering,
-        suffixHashOrdering: suffixHashOrdering,
-        hashArray: hashArray,
-      })
-    }
-  })
+  // await prisma.book.update({
+  //   where: {
+  //     id: bookId
+  //   },
+  //   data: {
+  //     hash_index: JSON.stringify({
+  //       prefixHashOrdering: prefixHashOrdering,
+  //       suffixHashOrdering: suffixHashOrdering,
+  //       hashArray: hashArray,
+  //     })
+  //   }
+  // })
 }

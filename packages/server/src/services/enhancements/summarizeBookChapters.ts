@@ -101,8 +101,6 @@ export const summarizeBookChapters = async (params: {
       isFirstChapter: chapterIndex === 0
     })
 
-    console.log(`summarizing chapter ${chapterIndex}`)
-
     const summary = await prompt({
       systemPrompt,
       userPrompt,
@@ -110,7 +108,7 @@ export const summarizeBookChapters = async (params: {
     })
 
     const chapterWords = prepareTextForHash({ text: chapter })
-    const endOfChapterHash = hashWords({
+    const endOfChapterHash = await hashWords({
       words: chapterWords,
       boundary: HashBoundary.END
     })

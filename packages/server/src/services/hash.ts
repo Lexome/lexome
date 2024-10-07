@@ -1,5 +1,3 @@
-import { createHash } from 'crypto';
-
 export type Hash = {
   prefixHash?: string;
   suffixHash?: string;
@@ -12,10 +10,20 @@ export enum HashBoundary {
   END = 'end'
 }
 
-export const hashWords = (params: {
+export const hash = async (string: string): Promise<string> => {
+  const utf8 = new TextEncoder().encode(string);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((bytes) => bytes.toString(16).padStart(2, '0'))
+    .join('');
+  return hashHex;
+}
+
+export const hashWords = async (params: {
   words: string[],
   boundary?: HashBoundary
-}): string => {
+}): Promise<string> => {
   const { words, boundary=HashBoundary.START } = params
 
   let truncatedWords = words
@@ -30,8 +38,7 @@ export const hashWords = (params: {
     }
   }
 
-  const hash = createHash('sha256').update(truncatedWords.join(' ')).digest('hex');
-  return hash
+  return await hash(truncatedWords.join(' '))
 }
 
 export const prepareTextForHash = (params: {
@@ -42,21 +49,23 @@ export const prepareTextForHash = (params: {
   return words
 }
 
-export const createHashes = (params: {
+export const createHashes = async (params: {
   text: string
-}): Hash[] => {
+}): Promise<Hash[]> => {
   const { text } = params
   const words = prepareTextForHash({ text });
+
+  console.log(words)
 
   const hashes: Hash[] = [];
 
   for (let i = 0; i < words.length; i++) {
     const prefixHashStart = Math.max(i - 14, 0);
-    const prefixHash = hashWords({
+    const prefixHash = await hashWords({
       words: words.slice(prefixHashStart, i + 1),
     });
 
-    const suffixHash = hashWords({
+    const suffixHash = await hashWords({
       words: words.slice(i, i + 15),
     });
 

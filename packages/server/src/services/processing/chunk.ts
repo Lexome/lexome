@@ -1,6 +1,3 @@
-import Epub from "epubjs";
-import Section from "epubjs/types/section";
-
 export enum ChunkMethod {
   SENTENCE = 'sentence',
   PARAGRAPH = 'paragraph',

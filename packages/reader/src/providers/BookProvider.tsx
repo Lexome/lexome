@@ -117,10 +117,24 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
     rendition.on('relocated', () => {
       const wordsStart = rendition?.location.start.cfi
       const wordsEnd = rendition?.location.end.cfi
+      const location = rendition?.location
 
       const contents: any = rendition.getContents()
+
       for (const content of contents) {
-        const range = content.cfiRangeToDomRange(wordsStart, wordsEnd)
+        let startRange = content.range(location.start.cfi);
+        let endRange = content.range(location.end.cfi);
+        console.log(startRange)
+        console.log(endRange)
+
+        if (startRange && endRange) {
+          let range = document.createRange();
+          range.setStart(startRange.startContainer, startRange.startOffset);
+          range.setEnd(endRange.endContainer, endRange.endOffset);
+
+          let visibleText = range.toString();
+          console.log(visibleText);
+        }
       }
     })
 
