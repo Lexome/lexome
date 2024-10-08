@@ -12,4 +12,5 @@ export {
   createHashes,
   hashWords,
   hash,
+  prepareTextForHash
 } from './services/hash'

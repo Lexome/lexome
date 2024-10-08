@@ -2,6 +2,7 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "@types/node": "^20.12.11",
     "lerna": "^4.0.0",
     "prisma": "^5.7.1"
   },
