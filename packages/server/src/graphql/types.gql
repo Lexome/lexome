@@ -159,6 +159,7 @@ type Book {
   authors: [Author]
   enhancements: [Enhancement]
   genres: [Genre]
+  hashIndex: String
 }
 
 type BookConnection {

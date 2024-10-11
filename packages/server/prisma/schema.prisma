@@ -88,7 +88,7 @@ model book {
   publishers    publisher[]
   enhancements  enhancement[]
   genres        genre[]
-  hash_index    Json?
+  hash_index    String?
 }
 
 model genre {
