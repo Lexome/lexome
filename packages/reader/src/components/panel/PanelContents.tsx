@@ -4,6 +4,7 @@ import { useEnhancementPanelState } from '@/hooks/useEnhancementPanelState'
 import { EnhancementType } from '@lexome/core'
 import { useSubscribedEnhancements } from '@/hooks/data/useSubscribedEnhancements'
 import { useMemo } from 'react'
+import { useBookMetadata } from '@/hooks/data/useBookMetadata'
 
 
 type EnhancementTypeMenuSpec = {
@@ -17,6 +18,8 @@ const enhancementTypeMenuSpec: EnhancementTypeMenuSpec = [
 
 const PanelMenu = () => {
   const { data: subscribedEnhancements } = useSubscribedEnhancements()
+
+  const { data: bookMetadata } = useBookMetadata()
 
   const subscribedEnhancementTypeMenu = useMemo(() => {
     const types: EnhancementType[] = []
@@ -33,6 +36,7 @@ const PanelMenu = () => {
     setSelectedEnhancementType,
     selectedEnhancementData,
   } = useEnhancementPanelState()
+
 
   const handleChange = (value: string) => {
     setSelectedEnhancementType(value as EnhancementType)

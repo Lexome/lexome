@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { graphql } from "../../../gql"
 import request from "graphql-request"
 import { GRAPHQL_ENDPOINT } from "@/config"
+import { useQueryParams } from "../useQueryParams"
 
 const bookAssetQuery = graphql(`
 query GetBookAsset($id: String!) {
@@ -11,7 +12,9 @@ query GetBookAsset($id: String!) {
 }
 `)
 
-export const useBookAsset = (bookId: string | null) => {
+export const useBookAsset = () => {
+  const { bookId } = useQueryParams()
+
   return useQuery({
     queryKey: ['bookAsset', bookId],
     queryFn: async () => {

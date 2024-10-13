@@ -49,13 +49,21 @@ export const prepareTextForHash = (params: {
   return words
 }
 
+export type HashOrdering = {
+  [key: string]: number[]
+}
+
+export type HashIndex = {
+  prefixHashOrdering: HashOrdering,
+  suffixHashOrdering: HashOrdering,
+  hashArray: Hash[],
+}
+
 export const createHashes = async (params: {
   text: string
 }): Promise<Hash[]> => {
   const { text } = params
   const words = prepareTextForHash({ text });
-
-  console.log(words)
 
   const hashes: Hash[] = [];
 

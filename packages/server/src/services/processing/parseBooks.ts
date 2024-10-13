@@ -1,5 +1,5 @@
 import { ChunkMethod, chunkText } from "./chunk";
-import { createHashes, type Hash } from "../hash";
+import { createHashes, type HashIndex, type Hash } from "../hash";
 import { prisma } from "../../prisma";
 import { readChaptersFromEpub } from "./readChaptersFromEpub";
 
@@ -34,15 +34,7 @@ export const createChapterHashes = async (params: {
 
 export const createOrderedHashForChapters = async (params: {
   chapters: string[]
-}): Promise<{
-  prefixHashOrdering: {
-    [key: string]: number[]
-  },
-  suffixHashOrdering: {
-    [key: string]: number[]
-  },
-  hashArray: Hash[],
-}> => {
+}): Promise<HashIndex> => {
   const { chapters } = params;
 
   const prefixHashOrdering: {
