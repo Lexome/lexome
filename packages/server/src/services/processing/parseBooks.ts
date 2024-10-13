@@ -142,16 +142,16 @@ export const saveHashOrderingForBook = async (params: {
     hashArray,
   } = await createOrderedHashForChapters({ chapters });
 
-  // await prisma.book.update({
-  //   where: {
-  //     id: bookId
-  //   },
-  //   data: {
-  //     hash_index: JSON.stringify({
-  //       prefixHashOrdering: prefixHashOrdering,
-  //       suffixHashOrdering: suffixHashOrdering,
-  //       hashArray: hashArray,
-  //     })
-  //   }
-  // })
+  await prisma.book.update({
+    where: {
+      id: bookId
+    },
+    data: {
+      hash_index: JSON.stringify({
+        prefixHashOrdering: prefixHashOrdering,
+        suffixHashOrdering: suffixHashOrdering,
+        hashArray: hashArray,
+      })
+    }
+  })
 }
