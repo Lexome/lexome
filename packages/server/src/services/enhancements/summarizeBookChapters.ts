@@ -108,7 +108,7 @@ export const summarizeBookChapters = async (params: {
     })
 
     const chapterWords = prepareTextForHash({ text: chapter })
-    const endOfChapterHash = await hashWords({
+    const { hashed: endOfChapterHash } = await hashWords({
       words: chapterWords,
       boundary: HashBoundary.END
     })
@@ -119,7 +119,7 @@ export const summarizeBookChapters = async (params: {
       anchor: {
         id: uuidv4(),
         word: chapterWords[chapterWords.length - 1],
-        prefixHash: endOfChapterHash,
+        prefixHash: endOfChapterHash
       }
     })
 

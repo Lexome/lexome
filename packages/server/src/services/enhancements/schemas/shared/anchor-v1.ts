@@ -7,4 +7,6 @@ export const anchor = z.object({
   word: z.string(),
   prefixHash: z.string().optional(),
   suffixHash: z.string().optional(),
+  prefixHashComplete: z.boolean().optional(),
+  suffixHashComplete: z.boolean().optional(),
 })

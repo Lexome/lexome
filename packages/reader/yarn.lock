@@ -1211,10 +1211,10 @@
   resolved "https://registry.npmjs.org/@kamilkisiela/fast-url-parser/-/fast-url-parser-1.1.4.tgz"
   integrity sha512-gbkePEBupNydxCelHCESvFSFM8XPh1Zs/OAVRW/rKpEqPAl5PbOM90Si8mv9bvnR53uPD2s/FiRxdvSejpRJew==
 
-"@lexome/core@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npmjs.org/@lexome/core/-/core-1.0.6.tgz"
-  integrity sha512-oqjNiZGIqHnBMuJeeSuegqmKBac+5jnwYA6FgOp57v2Q0ZGu47eu6Ks/Yx3BpVW2JDXn8BGm4Y0FxQ0CXThV9g==
+"@lexome/core@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.npmjs.org/@lexome/core/-/core-1.0.8.tgz"
+  integrity sha512-vNeGzs7QrfUFQHjN24f7f+hRTxo2oMjCN94NYvDzoGoLdjPw6PoAsY3iDIRXaLIRX+JyjNhIdOhrWx7BJ+8gQw==
   dependencies:
     fast-json-patch "^3.1.1"
     zod "^3.22.4"

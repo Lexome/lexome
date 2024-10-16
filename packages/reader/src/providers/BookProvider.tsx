@@ -6,6 +6,8 @@ import { RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } fr
 import { useQueryParams } from "@/hooks/useQueryParams"
 import ePub, { Book, Rendition } from 'epubjs'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useBookMetadata } from '@/hooks/data/useBookMetadata'
+import { useSharedState } from '@/hooks/useSharedState'
 
 const MAX_READABLE_WIDTH = 650
 
@@ -68,7 +70,14 @@ type BookProviderProps = React.PropsWithChildren<{
 
 export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
   const { bookId } = useQueryParams()
-  const {data: bookAsset, isLoading} = useBookAsset(bookId)
+  const {data: bookAsset, isLoading} = useBookAsset()
+  const {data: bookMetadata, isLoading: isBookMetadataLoading} = useBookMetadata()
+
+  const hashIndex = bookMetadata?.hashIndex
+  const [hashIndexStartCursor, setHashIndexStartCursor] = useSharedState('hashIndexStartCursor', 0)
+  const hashIndexEndCursor = useSharedState('hashIndexEndCursor', 0)
+
+  const findTextPositionsInIndex = useFindTextPositionsInIndex()
 
   const [book, setBook] = useState<Book | undefined>()
   const [_, setRightPanelState] = useRightPanel()
@@ -124,8 +133,6 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
       for (const content of contents) {
         let startRange = content.range(location.start.cfi);
         let endRange = content.range(location.end.cfi);
-        console.log(startRange)
-        console.log(endRange)
 
         if (startRange && endRange) {
           let range = document.createRange();
@@ -133,7 +140,6 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
           range.setEnd(endRange.endContainer, endRange.endOffset);
 
           let visibleText = range.toString();
-          console.log(visibleText);
         }
       }
     })

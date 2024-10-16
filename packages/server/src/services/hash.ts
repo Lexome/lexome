@@ -1,6 +1,9 @@
+
 export type Hash = {
   prefixHash?: string;
   suffixHash?: string;
+  prefixHashComplete?: boolean;
+  suffixHashComplete?: boolean;
 }
 
 const HASH_LENGTH = 15
@@ -23,7 +26,10 @@ export const hash = async (string: string): Promise<string> => {
 export const hashWords = async (params: {
   words: string[],
   boundary?: HashBoundary
-}): Promise<string> => {
+}): Promise<{
+  hashed: string,
+  complete: boolean
+}> => {
   const { words, boundary=HashBoundary.START } = params
 
   let truncatedWords = words
@@ -38,7 +44,12 @@ export const hashWords = async (params: {
     }
   }
 
-  return await hash(truncatedWords.join(' '))
+  const hashed = await hash(truncatedWords.join(' '))
+
+  return {
+    hashed,
+    complete: truncatedWords.length === HASH_LENGTH
+  }
 }
 
 export const prepareTextForHash = (params: {
@@ -69,15 +80,15 @@ export const createHashes = async (params: {
 
   for (let i = 0; i < words.length; i++) {
     const prefixHashStart = Math.max(i - 14, 0);
-    const prefixHash = await hashWords({
+    const { hashed: prefixHash, complete: prefixHashComplete } = await hashWords({
       words: words.slice(prefixHashStart, i + 1),
     });
 
-    const suffixHash = await hashWords({
+    const { hashed: suffixHash, complete: suffixHashComplete } = await hashWords({
       words: words.slice(i, i + 15),
     });
 
-    hashes.push({ prefixHash, suffixHash });
+    hashes.push({ prefixHash, suffixHash, prefixHashComplete, suffixHashComplete });
   }
 
   return hashes;
