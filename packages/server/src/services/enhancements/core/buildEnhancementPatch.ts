@@ -31,7 +31,7 @@ export function buildEnhancementPatch<
   E extends keyof Shape[A][B][C][D]=never,
   F extends keyof Shape[A][B][C][D][E]=never,
 >(params: {
-  enhancementType: EnhancementType,
+  enhancementType: Type,
   operation: BaseOperation,
   path: [A, B?, C?, D?, E?, F?],
 }) {

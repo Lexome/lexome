@@ -23,6 +23,7 @@ model user {
   enhancement_patches  enhancement_patch[]
   subscriptions        subscription[]
   publishers           publisher_user[]
+  collections          book_collection[]
 }
 
 model author {
@@ -88,6 +89,7 @@ model book {
   publishers    publisher[]
   enhancements  enhancement[]
   genres        genre[]
+  collections   book_collection[]
   hash_index    String?
 }
 
@@ -100,6 +102,19 @@ model genre {
 
 enum EnhancementType {
   summary
+  discussion
+  narration
+}
+
+enum EmailSubscriptionType {
+  major_updates
+}
+
+model email_subscription {
+  id          String    @id @default(uuid())
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  email       String
+  types       EmailSubscriptionType[]
 }
 
 model enhancement {
@@ -146,4 +161,10 @@ model enhancement_patch {
   type                EnhancementType
 }
 
-
+model book_collection {
+  id                  String        @id @default(uuid())
+  created_at          DateTime      @default(now()) @db.Timestamptz(6)
+  user_id             String
+  user                user          @relation(fields: [user_id], references: [id])
+  books               book[]
+}

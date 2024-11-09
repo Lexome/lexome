@@ -1,0 +1,1 @@
+export const BASIC_ENHANCEMENT_TITLE = 'Lexome Basic Enhancement'

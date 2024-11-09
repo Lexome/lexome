@@ -52,10 +52,23 @@ export const hashWords = async (params: {
   }
 }
 
+type PrepareTextOptions = {
+  isBible?: boolean
+}
+
 export const prepareTextForHash = (params: {
-  text: string
+  text: string,
+  options?: PrepareTextOptions
 }): string[] => {
-  const { text } = params
+  let { text, options } = params
+
+  // If the text is a bible, we want to remove bible verse numbers of the format NN:NN
+  // We don't want to do this for other books because it will erroneously match times 
+  // and cause other potential problems
+  if (options?.isBible) {
+    text = text.replace(/\d+:\d+/g, '')
+  }
+
   const words = text.split(/[\s.,!?;:'"()\[\]{}<>—]+/u).filter(Boolean).map(word => word.toLowerCase());
   return words
 }

@@ -8,6 +8,7 @@ import ePub, { Book, Rendition } from 'epubjs'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useBookMetadata } from '@/hooks/data/useBookMetadata'
 import { useSharedState } from '@/hooks/useSharedState'
+import { useFindTextInIndex } from '@/hooks/useFindTextInIndex'
 
 const MAX_READABLE_WIDTH = 650
 
@@ -15,6 +16,23 @@ type Enhancement = {
   id: string,
   includedTypes: EnhancementType[],
   data: Partial<Enhancements>
+}
+
+const useFocusManager = (book: Book) => {
+  const focused = useSharedState('highlights', null)
+
+  const focusNextSentence = () => {
+
+  }
+
+  const focusPreviousSentence = () => {
+
+  }
+
+
+  return {
+
+  }
 }
 
 const BookContext = createContext<{
@@ -77,7 +95,7 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
   const [hashIndexStartCursor, setHashIndexStartCursor] = useSharedState('hashIndexStartCursor', 0)
   const hashIndexEndCursor = useSharedState('hashIndexEndCursor', 0)
 
-  const findTextPositionsInIndex = useFindTextPositionsInIndex()
+  const findTextInIndex = useFindTextInIndex()
 
   const [book, setBook] = useState<Book | undefined>()
   const [_, setRightPanelState] = useRightPanel()
@@ -124,11 +142,10 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
     });
 
     rendition.on('relocated', () => {
-      const wordsStart = rendition?.location.start.cfi
-      const wordsEnd = rendition?.location.end.cfi
       const location = rendition?.location
-
       const contents: any = rendition.getContents()
+
+      console.log(contents.length)
 
       for (const content of contents) {
         let startRange = content.range(location.start.cfi);
@@ -140,6 +157,8 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
           range.setEnd(endRange.endContainer, endRange.endOffset);
 
           let visibleText = range.toString();
+          console.log(visibleText, range)
+          findTextInIndex(visibleText)
         }
       }
     })
@@ -181,6 +200,8 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
       if (parent) {
         parent.className = "annotated-parent"
       }
+
+      console.log(range, cfiRange, typeof cfiRange)
 
       rendition.annotations.underline(cfiRange, {}, () => {
       }, 'test-underline');

@@ -16,6 +16,8 @@ type Query {
   ): BookConnection
   getBook(id: String!): Book
 
+  getBookCollectionForUser: BookCollection
+
   getAuthors(
     query: String,
     pagination: Pagination
@@ -64,6 +66,8 @@ type Mutation {
   #deleteAuthor(id: String!): Author
 
   createSubscription(enhancementId: String!, role: Role): Subscription
+
+  addBookToCollection(bookId: String!): Book
 
   createEnhancement(
     title: String!,
@@ -162,6 +166,13 @@ type Book {
   hashIndex: String
 }
 
+type BookCollection {
+  id: String!
+  createdAt: String!
+  books: [Book!]!
+  user: User!
+}
+
 type BookConnection {
   records: [Book!]!
   pageInfo: PageInfo!
@@ -209,4 +220,6 @@ type EnhancementPatch {
 
 enum EnhancementType {
   summary
+  discussion
+  narration
 }
