@@ -3,7 +3,7 @@ import path from "path"
 import { breakChunkIntoProcessableSegments } from "../services/processing/chunk"
 import { audioPrompt, transcriptionPrompt } from "../services/prompt"
 import { TEMP_DIRECTORY, uploadFileToS3 } from "../utils"
-import { generateAudioNarration } from "../services/enhancements/generators/generateAudioNarration"
+import { generateAudioNarration } from "../services/enhancements/operations/generateAudioNarration"
 
 // const sampleText = `
 // “Tom!”
