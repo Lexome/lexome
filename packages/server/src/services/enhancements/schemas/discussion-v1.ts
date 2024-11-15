@@ -1,10 +1,10 @@
 import zod from "zod";
-import { anchor } from "./shared/anchor-v1";
+import { anchorOptional } from "./shared/anchor-v1";
 
 const replySchema = zod.object({
   id: zod.string().uuid(),
   message: zod.string(),
-  createdAt: zod.string().datetime(),
+  createdAt: zod.string().datetime().optional(),
   updatedAt: zod.string().datetime(),
   author: zod.object({
     id: zod.string().uuid(),
@@ -19,8 +19,7 @@ export type Reply = Omit<zod.infer<typeof replySchema>, "replies"> & {
 
 export const threadSchema = zod.object({
   id: zod.string().uuid(),
-  anchor: anchor,
-  length: zod.number(),
+  anchor: anchorOptional,
   message: zod.string(),
   createdAt: zod.string().datetime(),
   updatedAt: zod.string().datetime(),
@@ -31,7 +30,7 @@ export const threadSchema = zod.object({
   replies: replySchema.array(),
 })
 
-type Thread = Omit<zod.infer<typeof threadSchema>, "replies"> & {
+export type Thread = Omit<zod.infer<typeof threadSchema>, "replies"> & {
   replies: Reply[];
 }
 

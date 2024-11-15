@@ -12,3 +12,5 @@ export const anchor = z.object({
   cfiStart: z.string().optional(),
   cfiEnd: z.string().optional(),
 })
+
+export const anchorOptional = anchor.optional()
