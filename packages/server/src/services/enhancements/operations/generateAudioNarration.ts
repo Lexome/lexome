@@ -80,7 +80,6 @@ export const generateAudioNarration = async (params: {
 
         const narrationSegment: NarrationSegment = {
           anchor: {
-            id: uuidv4(),
             word: segmentWords[0],
             suffixHash: startOfSegmentHash,
             suffixHashComplete: isHashComplete

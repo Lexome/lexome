@@ -130,7 +130,6 @@ export const generateBookSummary = async (params: {
           id: uuidv4(),
           text: summary,
           anchor: {
-            id: uuidv4(),
             word: chapterWords[chapterWords.length - 1],
             prefixHash: endOfChapterHash
           }

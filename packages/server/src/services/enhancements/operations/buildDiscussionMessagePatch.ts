@@ -2,14 +2,14 @@ import { v4 as uuid } from 'uuid'
 import { buildEnhancementPatch } from '../core/buildEnhancementPatch'
 import { EnhancementType } from '../../../generated/graphql'
 import { Discussion, Reply, Thread } from '../schemas/discussion-v1'
-import { anchor, Anchor } from '../schemas/shared/anchor-v1'
+import { Anchor } from '../schemas/shared/anchor-v1'
 
 export const buildDiscussionMessagePatch = (params: {
   data: Discussion,
   userId: string,
   userDisplayName: string,
   message: string,
-  replyParents: string[] | undefined,
+  replyParents?: string[],
   anchor?: Anchor
 }) => {
   const {
@@ -38,7 +38,7 @@ export const buildDiscussionMessagePatch = (params: {
     replies: [],
   }
 
-  if (replyParents) {
+  if (replyParents && replyParents.length > 0) {
     let threads: (Reply | Thread)[] = discussion.threads
 
     while (replyParents.length > 0) {
@@ -58,7 +58,7 @@ export const buildDiscussionMessagePatch = (params: {
     }
 
     return buildEnhancementPatch({
-      enhancementType: EnhancementType,
+      enhancementType: EnhancementType.Discussion,
       path: updatePath as any,
       operation: {
         op: 'add',
@@ -67,9 +67,20 @@ export const buildDiscussionMessagePatch = (params: {
     })
 
   } else {
+    updatePath.push(-1)
+
     const thread: Thread = {
       ...sharedFields,
       anchor
     }
+
+    return buildEnhancementPatch({
+      enhancementType: EnhancementType.Discussion,
+      path: updatePath as any,
+      operation: {
+        op: 'add',
+        value: thread
+      }
+    })
   }
 }

@@ -19,6 +19,7 @@ model user {
   author_id            String?             @unique
   author               author?
   phone                String?             @unique
+  email                String?             @unique
   verification_code    String?
   enhancement_patches  enhancement_patch[]
   subscriptions        subscription[]

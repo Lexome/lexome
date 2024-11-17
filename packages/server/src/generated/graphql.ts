@@ -87,7 +87,7 @@ export type EnhancementPatch = {
 };
 
 export enum EnhancementType {
-  Chat = 'chat',
+  Discussion = 'discussion',
   Narration = 'narration',
   Summary = 'summary'
 }
