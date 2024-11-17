@@ -1,18 +1,27 @@
-import { EnhancementType } from "@prisma/client"
+import { EnhancementType } from "../../../generated/graphql"
 import { summarySchema } from "../schemas/summary-v1";
-
-type EnhancementTypeSpec = {
-  [key in EnhancementType]: {
-    slug: EnhancementType;
-    schema: Zod.ZodObject<any>;
-    displayName: string;
-  }
-}
+import { discussionSchema } from "../schemas/discussion-v1";
+import { narrationSchema } from "../schemas/narration-v1";
+import { EnhancementTypeSpec } from "../types";
+import { discussionAuthorizor } from "../authorizors/discussion";
 
 export const enhancementTypeSpecs: EnhancementTypeSpec = {
-  [EnhancementType.summary]: {
-    slug: EnhancementType.summary,
+  [EnhancementType.Summary]: {
+    slug: EnhancementType.Summary,
     schema: summarySchema,
     displayName: "Summary",
+  },
+
+  [EnhancementType.Discussion]: {
+    slug: EnhancementType.Discussion,
+    schema: discussionSchema,
+    displayName: "Discussion",
+    authorizor: discussionAuthorizor
+  },
+
+  [EnhancementType.Narration]: {
+    slug: EnhancementType.Narration,
+    schema: narrationSchema,
+    displayName: "Narration",
   },
 }

@@ -15,7 +15,6 @@ const main = async () => {
 
   const taskPath = path.join(tasksFolder, taskName)
 
-
   try {
     const task = require(taskPath).default
     console.log('running task', taskName, 1)

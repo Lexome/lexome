@@ -1,21 +1,52 @@
+import { EnhancementType, Enhancements } from '@lexome/core'
+
 import { useBookAsset } from "@/hooks/data/useBookAsset"
-import { LEFT_PANEL_STATE, RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } from "@/hooks/usePanel"
+import { useSubscribedEnhancements } from "@/hooks/data/useSubscribedEnhancements"
+import { RIGHT_PANEL_STATE, getRightPanelWidth, useLeftPanel, useRightPanel } from "@/hooks/usePanel"
 import { useQueryParams } from "@/hooks/useQueryParams"
 import ePub, { Book, Rendition } from 'epubjs'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useBookMetadata } from '@/hooks/data/useBookMetadata'
+import { useSharedState } from '@/hooks/useSharedState'
+import { useFindTextInIndex } from '@/hooks/useFindTextInIndex'
 
 const MAX_READABLE_WIDTH = 650
+
+type Enhancement = {
+  id: string,
+  includedTypes: EnhancementType[],
+  data: Partial<Enhancements>
+}
+
+const useFocusManager = (book: Book) => {
+  const focused = useSharedState('highlights', null)
+
+  const focusNextSentence = () => {
+
+  }
+
+  const focusPreviousSentence = () => {
+
+  }
+
+
+  return {
+
+  }
+}
 
 const BookContext = createContext<{
   isLoading: boolean,
   book?: Book,
   setBook: (book: Book) => void,
   rendition?: Rendition,
-  setRendition: (rendition: Rendition) => void
+  subscribedEnhancements: Enhancement[],
+  setRendition: (rendition: Rendition) => void,
 }>({
   isLoading: true,
   setBook: () => {},
-  setRendition: () => {}
+  setRendition: () => {},
+  subscribedEnhancements: []
 })
 
 const useReaderDimensions = () => {
@@ -57,13 +88,37 @@ type BookProviderProps = React.PropsWithChildren<{
 
 export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
   const { bookId } = useQueryParams()
-  const {data: bookAsset, isLoading} = useBookAsset(bookId)
+  const {data: bookAsset, isLoading} = useBookAsset()
+  const {data: bookMetadata, isLoading: isBookMetadataLoading} = useBookMetadata()
+
+  const hashIndex = bookMetadata?.hashIndex
+  const [hashIndexStartCursor, setHashIndexStartCursor] = useSharedState('hashIndexStartCursor', 0)
+  const hashIndexEndCursor = useSharedState('hashIndexEndCursor', 0)
+
+  const findTextInIndex = useFindTextInIndex()
 
   const [book, setBook] = useState<Book | undefined>()
   const [_, setRightPanelState] = useRightPanel()
   const [rendition, setRendition] = useState<Rendition | undefined>()
-  // const [selectedRange, setSelectedRange] = useState<string | undefined>()
-  // const [selectedParagraph, setSelectedParagraph] = useState<string | undefined>()
+
+  const {data: subscribedEnhancementsData} = useSubscribedEnhancements()
+
+  const subscribedEnhancements: Enhancement[] = useMemo(() => {
+    const subscribedEnhancements = subscribedEnhancementsData?.getSubscribedEnhancementsForBook || []
+    return subscribedEnhancements.map((enhancement) => {
+      const {
+        coalescedData,
+        includedTypes,
+        id
+      } = enhancement
+
+      return {
+        id,
+        includedTypes,
+        data: JSON.parse(coalescedData)
+      }
+    })
+  }, [subscribedEnhancementsData])
 
   const readerDimensions = useReaderDimensions()
 
@@ -86,13 +141,46 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
       // flow: 'scrolled-doc'
     });
 
+    rendition.on('relocated', () => {
+      const location = rendition?.location
+      const contents: any = rendition.getContents()
+
+      console.log(contents.length)
+
+      for (const content of contents) {
+        let startRange = content.range(location.start.cfi);
+        let endRange = content.range(location.end.cfi);
+
+        if (startRange && endRange) {
+          let range = document.createRange();
+          range.setStart(startRange.startContainer, startRange.startOffset);
+          range.setEnd(endRange.endContainer, endRange.endOffset);
+
+          let visibleText = range.toString();
+          console.log(visibleText, range)
+          findTextInIndex(visibleText)
+        }
+      }
+    })
+
     rendition.themes.register("main",
       {
         "p": {
           "margin-top": "8px",
           "font-size": "18px",
           "line-height": "1.5",
+          "margin-bottom": "16px",
           "color": '#555555',
+          "font-family": 'Inter, sans-serif',
+          "text-align": "justify",
+          "text-indent": "0"
+        },
+        "strong": {
+          "font-weight": "bold",
+          "font-family": 'Inter, sans-serif',
+          "font-size": "18px",
+          "font-variant": "normal",
+          "text-transform": "uppercase",
         }
       }
     );
@@ -112,6 +200,8 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
       if (parent) {
         parent.className = "annotated-parent"
       }
+
+      console.log(range, cfiRange, typeof cfiRange)
 
       rendition.annotations.underline(cfiRange, {}, () => {
       }, 'test-underline');
@@ -139,7 +229,9 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
         book,
         setBook,
         rendition,
-        setRendition
+        setRendition,
+        subscribedEnhancements,
+        isLoading
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { ChunkMethod, chunkText } from "./chunk";
-import { createHashes, type Hash } from "../hash";
+import { createHashes, type HashIndex, type Hash } from "../hash";
 import { prisma } from "../../prisma";
 import { readChaptersFromEpub } from "./readChaptersFromEpub";
 
@@ -18,31 +18,23 @@ export const createChapterChunks = (params: {
   return chunks;
 }
 
-export const createChapterHashes = (params: {
+export const createChapterHashes = async (params: {
   chapters: string[];
 }) => {
   const { chapters } = params;
   const hashes: Hash[][] = [];
 
   for (const chapter of chapters) {
-    const hashesForChapter = createHashes({ text: chapter });
+    const hashesForChapter = await createHashes({ text: chapter });
     hashes.push(hashesForChapter);
   }
 
   return hashes;
 }
 
-export const createOrderedHashForChapters = (params: {
+export const createOrderedHashForChapters = async (params: {
   chapters: string[]
-}): {
-  prefixHashOrdering: {
-    [key: string]: number[]
-  },
-  suffixHashOrdering: {
-    [key: string]: number[]
-  },
-  hashArray: Hash[],
-} => {
+}): Promise<HashIndex> => {
   const { chapters } = params;
 
   const prefixHashOrdering: {
@@ -57,7 +49,7 @@ export const createOrderedHashForChapters = (params: {
   let endHashIndex = 0;
 
   for (const chapter of chapters) {
-    const hashes = createHashes({ text: chapter });
+    const hashes = await createHashes({ text: chapter });
 
     for (const hash of hashes) {
       if (hash.prefixHash) {
@@ -140,14 +132,14 @@ export const saveHashOrderingForBook = async (params: {
     prefixHashOrdering,
     suffixHashOrdering,
     hashArray,
-  } = createOrderedHashForChapters({ chapters });
+  } = await createOrderedHashForChapters({ chapters });
 
   await prisma.book.update({
     where: {
       id: bookId
     },
     data: {
-      hashIndex: JSON.stringify({
+      hash_index: JSON.stringify({
         prefixHashOrdering: prefixHashOrdering,
         suffixHashOrdering: suffixHashOrdering,
         hashArray: hashArray,

@@ -15,9 +15,9 @@ const longText = `
 `;
 
 describe('createHashes', () => {
-  it('should create hashes for a given text', () => {
+  it('should create hashes for a given text', async () => {
     const text = 'This is a test text.';
-    const hashes = createHashes({ text });
+    const hashes = await createHashes({ text });
 
     for (const hash of hashes) {
       expect(hash).toHaveProperty('startHash');

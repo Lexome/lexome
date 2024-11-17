@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Lexome</title>
+  <meta name="description"
+    content="Lexome is an e-reader built for the future. Lexome's immersive features connect readers to authors' worlds and to the community of fellow readers." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/favicon.png" />
+  <style>
+    body {
+      margin: 0
+    }
+
+    div {
+      font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+      font-weight: normal;
+    }
+
+    .snippet-section {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .snippet-section {
+        flex-direction: column;
+      }
+    }
+
+    nav {
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .banner {
+      margin-top: 100px;
+      font-size: 64px;
+      line-height: 1.2;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .banner-2 {
+      margin-top: 60px;
+      font-size: 48px;
+      line-height: 1.2;
+      padding: 24px;
+      text-align: center;
+      color: #333;
+    }
+
+    .centered-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .snippet-section-gray {
+      background-color: #f5f5f5;
+    }
+
+    .snippet {
+      max-width: 800px;
+      width: 500px;
+      font-size: 24px;
+      line-height: 1.2;
+      color: #333;
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+
+    .main-image {
+      border-radius: 16px;
+      width: 500px;
+    }
+
+    @media (max-width: 768px) {
+      .main-image {
+        width: calc(100% - 48px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .snippet {
+        width: calc(100% - 48px);
+        margin-top: 12px;
+        margin-bottom: 24px;
+        padding-left: 24px;
+      }
+    }
+
+    .feature-title {
+      font-size: 28px;
+      width: 300px;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 768px) {
+      .feature-title {
+        width: calc(100% - 48px);
+        margin-top: 24px;
+        padding-left: 24px;
+      }
+    }
+
+    .sub-banner {
+      font-size: 28px;
+      line-height: 1.2;
+      max-width: 800px;
+      margin-top: 24px;
+      margin-bottom: 60px;
+      text-align: left;
+    }
+
+    @media (max-width: 768px) {
+      .sub-banner {
+        width: calc(100% - 48px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="centered-wrapper">
+    <nav>
+      <img src="/logo.png" alt="Lexome" style="width: 200px" />
+      <div style="font-size: 20px; color: #333">
+        Beta launching soon...
+      </div>
+    </nav>
+  </div>
+  <main>
+    <div class="centered-wrapper">
+      <div class="banner">
+        A modern <span style="text-wrap: nowrap">e-reader</span>.
+      </div>
+    </div>
+    <div class="centered-wrapper">
+      <div class="sub-banner">
+        Lexome is an e-reader built for the future. Lexome&apos;s immersive features connect readers
+        to authors&apos; worlds and to the community of fellow readers.
+      </div>
+    </div>
+
+    <div class="centered-wrapper">
+      <img src="/image.webp" alt="Lexome" class="main-image" />
+    </div>
+
+    <div class="centered-wrapper">
+      <div class="banner-2">
+        Features
+      </div>
+    </div>
+
+    <div class="centered-wrapper snippet-section snippet-section-gray">
+      <div class="feature-title">
+        Summaries
+      </div>
+      <p class="snippet">
+        Lexome&apos;s embedded summaries update dynamically throughout the book, helping busy readers
+        keep track of the story without including spoilers from upcoming chapters.
+      </p>
+    </div>
+    <div class="centered-wrapper snippet-section">
+      <div class="feature-title">
+        Narration
+      </div>
+      <p class="snippet">
+        Our text-to-voice narration service can turn any book into a read-along experience.
+      </p>
+    </div>
+
+    <div class="centered-wrapper snippet-section snippet-section-gray">
+      <div class="feature-title">
+        Live Chat
+      </div>
+      <p class="snippet">
+        Lexome allows readers to create annotations on their device, share their notes,
+        and participate in live discussions with other readers in their community.
+      </p>
+    </div>
+
+    <div class="centered-wrapper snippet-section">
+      <div class="feature-title">
+        Author AMA
+      </div>
+      <p class="snippet">
+        Readers can add annotations to any part of the book with questions they have for the author.
+        Any questions that the participating author answers will be viewable by the community.
+      </p>
+    </div>
+
+    <div class="centered-wrapper">
+      <div class="banner-2">
+        Beta launching soon...
+      </div>
+    </div>
+  </main>
+</body>
+</html>

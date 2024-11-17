@@ -1,3 +1,5 @@
+import { enhancement } from "@prisma/client";
+
 import { convertObjectPropertiesToCamelCase, convertObjectPropertiesToSnakeCase } from "../../utils";
 import { createEnhancement } from "../../services/enhancements/core/createEnhancement";
 import { prisma } from "../../prisma";
@@ -31,18 +33,28 @@ export const resolvers: Resolvers = {
       const bookId = args.bookId;
       const user = context.user;
 
-      const enhancements = await prisma.enhancement.findMany({
-        where: {
-          subscriptions: {
-            some: {
-              user_id: user.id
-            }
-          },
-          book_id: bookId
-        }
-      })
+      let enhancements: enhancement[] = []
 
-      for (const enhancement of enhancements) {
+      if (user) {
+        enhancements = await prisma.enhancement.findMany({
+          where: {
+            subscriptions: {
+              some: {
+                user_id: user.id
+              }
+            },
+            book_id: bookId
+          }
+        })
+      }
+
+      if (enhancements.length === 0) {
+        enhancements = await prisma.enhancement.findMany({
+          where: {
+            is_default: true,
+            book_id: bookId
+          }
+        })
       }
 
       return enhancements.map(convertObjectPropertiesToCamelCase);

@@ -8,8 +8,8 @@ type SharedState = {
 type SharedStateOperations = {
   read: () => SharedState,
   write: (key: string, value: any) => void,
-  watchForUpdates: (key: string, subscription: Function) => void
-  endWatch: (key: string, subscription: Function) => void
+  watchForUpdates: (key: string, subscription: RenderFunction) => void
+  endWatch: (key: string, subscription: RenderFunction) => void
 }
 
 export const SharedStateContext = React.createContext<SharedStateOperations>({
@@ -19,18 +19,27 @@ export const SharedStateContext = React.createContext<SharedStateOperations>({
   endWatch: () => {}
 })
 
+export type RenderFunction = ({
+  lastValue,
+  newValue
+}: {
+  lastValue: any
+  newValue: any
+}) => void
+
 export const SharedStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const state = useRef<SharedState>({})
   const rerendersToTrigger = useRef<{
-    [key: string]: Function[]
+    [key: string]: RenderFunction[]
   }>({})
 
   function write<T = any>(key: string, value: T) {
+    const lastValue = state.current[key]
+
     state.current[key] = value
 
-
     rerendersToTrigger.current[key]?.forEach((render) => {
-      render()
+      render({ lastValue, newValue: value })
     })
   }
 
@@ -39,7 +48,7 @@ export const SharedStateProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
   // Adds rerender function to trigger when a key's value changes
-  function watchForUpdates(key: string, rerenderFunction: Function) {
+  function watchForUpdates(key: string, rerenderFunction: RenderFunction) {
     if (!rerendersToTrigger.current[key]) {
       rerendersToTrigger.current[key] = []
     }

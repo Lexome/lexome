@@ -21,7 +21,7 @@ export type Author = {
   books: Array<Book>;
   createdAt?: Maybe<Scalars['String']['output']>;
   displayName?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
   user?: Maybe<User>;
 };
 
@@ -40,6 +40,7 @@ export type Book = {
   description?: Maybe<Scalars['String']['output']>;
   enhancements?: Maybe<Array<Maybe<Enhancement>>>;
   genres?: Maybe<Array<Maybe<Genre>>>;
+  hashIndex?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   title: Scalars['String']['output'];
 };
@@ -58,34 +59,28 @@ export type BookFilters = {
 export type Enhancement = {
   __typename?: 'Enhancement';
   book: Book;
+  coalescedData: Scalars['String']['output'];
+  coalescedTimestamp: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
-  data: Scalars['String']['output'];
   id: Scalars['String']['output'];
   includedTypes: Array<EnhancementType>;
+  patches: Array<EnhancementPatch>;
   subscriptions: Array<Subscription>;
   title: Scalars['String']['output'];
-  updateEvents: Array<EnhancementEvent>;
 };
 
-export type EnhancementEvent = {
-  __typename?: 'EnhancementEvent';
+export type EnhancementPatch = {
+  __typename?: 'EnhancementPatch';
   createdAt: Scalars['String']['output'];
-  createdBy: User;
-  enhancement: Enhancement;
+  createdBy?: Maybe<User>;
   id: Scalars['String']['output'];
   operation: Scalars['String']['output'];
   type: EnhancementType;
 };
 
-export type EnhancementType = {
-  __typename?: 'EnhancementType';
-  createdAt: Scalars['String']['output'];
-  displayName: Scalars['String']['output'];
-  enhancementEvents: Array<EnhancementEvent>;
-  enhancements: Array<Enhancement>;
-  id: Scalars['String']['output'];
-  slug: Scalars['String']['output'];
-};
+export enum EnhancementType {
+  Summary = 'summary'
+}
 
 export type Genre = {
   __typename?: 'Genre';
@@ -99,6 +94,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   createAuthor?: Maybe<Author>;
   createBook?: Maybe<Book>;
+  createEnhancement?: Maybe<Enhancement>;
+  createSubscription?: Maybe<Subscription>;
   deleteBook?: Maybe<Book>;
 };
 
@@ -117,6 +114,19 @@ export type MutationCreateBookArgs = {
   description?: InputMaybe<Scalars['String']['input']>;
   genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   title: Scalars['String']['input'];
+};
+
+
+export type MutationCreateEnhancementArgs = {
+  bookId: Scalars['String']['input'];
+  includedTypes: Array<EnhancementType>;
+  title: Scalars['String']['input'];
+};
+
+
+export type MutationCreateSubscriptionArgs = {
+  enhancementId: Scalars['String']['input'];
+  role?: InputMaybe<Role>;
 };
 
 
@@ -141,6 +151,9 @@ export type Query = {
   getAuthors?: Maybe<AuthorConnection>;
   getBook?: Maybe<Book>;
   getBooks?: Maybe<BookConnection>;
+  getEnhancementsForBook: Array<Enhancement>;
+  getSubscribedEnhancementsForBook: Array<Enhancement>;
+  getSubscriptions: Array<Enhancement>;
 };
 
 
@@ -166,6 +179,21 @@ export type QueryGetBooksArgs = {
   query?: InputMaybe<Scalars['String']['input']>;
 };
 
+
+export type QueryGetEnhancementsForBookArgs = {
+  bookId: Scalars['String']['input'];
+};
+
+
+export type QueryGetSubscribedEnhancementsForBookArgs = {
+  bookId: Scalars['String']['input'];
+};
+
+
+export type QueryGetSubscriptionsArgs = {
+  bookId?: InputMaybe<Scalars['String']['input']>;
+};
+
 export enum Role {
   Admin = 'admin',
   User = 'user'
@@ -183,7 +211,7 @@ export type Subscription = {
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['String']['output'];
-  enhancementEvents: Array<EnhancementEvent>;
+  enhancementPatches: Array<EnhancementPatch>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isAdmin: Scalars['Boolean']['output'];
@@ -201,14 +229,30 @@ export type GetBookAssetQueryVariables = Exact<{
 
 export type GetBookAssetQuery = { __typename?: 'Query', getBook?: { __typename?: 'Book', assetUrl?: string | null } | null };
 
+export type GetBookMetadataQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetBookMetadataQuery = { __typename?: 'Query', getBook?: { __typename?: 'Book', hashIndex?: string | null } | null };
+
 export type ListStoryBooksQueryVariables = Exact<{
   query?: InputMaybe<Scalars['String']['input']>;
   pagination?: InputMaybe<Pagination>;
 }>;
 
 
-export type ListStoryBooksQuery = { __typename?: 'Query', getBooks?: { __typename?: 'BookConnection', pageInfo: { __typename?: 'PageInfo', hasMore: boolean, offset: number }, records: Array<{ __typename?: 'Book', id: string, title: string, coverUrl?: string | null, description?: string | null, authors?: Array<{ __typename?: 'Author', id?: string | null, displayName?: string | null } | null> | null }> } | null };
+export type ListStoryBooksQuery = { __typename?: 'Query', getBooks?: { __typename?: 'BookConnection', pageInfo: { __typename?: 'PageInfo', hasMore: boolean, offset: number }, records: Array<{ __typename?: 'Book', id: string, title: string, coverUrl?: string | null, description?: string | null, authors?: Array<{ __typename?: 'Author', id: string, displayName?: string | null } | null> | null }> } | null };
+
+export type GetEnhancementsQueryVariables = Exact<{
+  bookId: Scalars['String']['input'];
+}>;
+
+
+export type GetEnhancementsQuery = { __typename?: 'Query', getSubscribedEnhancementsForBook: Array<{ __typename?: 'Enhancement', coalescedData: string, includedTypes: Array<EnhancementType>, id: string }> };
 
 
 export const GetBookAssetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBookAsset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getBook"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"assetUrl"}}]}}]}}]} as unknown as DocumentNode<GetBookAssetQuery, GetBookAssetQueryVariables>;
+export const GetBookMetadataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBookMetadata"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getBook"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hashIndex"}}]}}]}}]} as unknown as DocumentNode<GetBookMetadataQuery, GetBookMetadataQueryVariables>;
 export const ListStoryBooksDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListStoryBooks"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"query"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getBooks"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"query"},"value":{"kind":"Variable","name":{"kind":"Name","value":"query"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasMore"}},{"kind":"Field","name":{"kind":"Name","value":"offset"}}]}},{"kind":"Field","name":{"kind":"Name","value":"records"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"coverUrl"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"authors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"displayName"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ListStoryBooksQuery, ListStoryBooksQueryVariables>;
+export const GetEnhancementsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEnhancements"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bookId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getSubscribedEnhancementsForBook"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"bookId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bookId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"coalescedData"}},{"kind":"Field","name":{"kind":"Name","value":"includedTypes"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetEnhancementsQuery, GetEnhancementsQueryVariables>;

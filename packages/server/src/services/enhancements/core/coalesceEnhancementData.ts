@@ -1,11 +1,8 @@
 import { enhancement as Enhancement } from "@prisma/client"
 
-import { enhancementTypeSpecs } from "./enhancementTypeSpecs"
 import { prisma } from "../../../prisma"
 import { applyEnhancementPatches } from './applyEnhancementPatches'
 import { convertDbPatchToGqlFormat } from "./convertDbPatchToGqlFormat"
-
-
 
 export const coalesceEnhancementData = async (params: {
   enhancement: Enhancement,
@@ -25,8 +22,6 @@ export const coalesceEnhancementData = async (params: {
       },
     },
   })
-
-  console.log('newPatches', newPatches)
 
   coalescedData = applyEnhancementPatches({
     patches: newPatches.map(patch => convertDbPatchToGqlFormat({ patch })),
@@ -58,8 +53,6 @@ export const coalesceEnhancementDataById = async (params: {
       id
     }
   })
-
-  console.log('enhancement', enhancement)
 
   if (!enhancement) {
     throw new Error('Enhancement not found')

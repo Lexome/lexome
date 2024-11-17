@@ -16,6 +16,8 @@ type Query {
   ): BookConnection
   getBook(id: String!): Book
 
+  getBookCollectionForUser: BookCollection
+
   getAuthors(
     query: String,
     pagination: Pagination
@@ -64,6 +66,8 @@ type Mutation {
   #deleteAuthor(id: String!): Author
 
   createSubscription(enhancementId: String!, role: Role): Subscription
+
+  addBookToCollection(bookId: String!): Book
 
   createEnhancement(
     title: String!,
@@ -116,6 +120,16 @@ type Mutation {
   #   type: String,
   # ): EnhancementEvent
   # deleteEnhancementEvent(id: String!): EnhancementEvent
+
+  # Auth
+  loginWithGoogle(googleAccessToken: String!): AuthResponse
+  createUserWithGoogle(googleAccessToken: String!): AuthResponse
+}
+
+type AuthResponse {
+  userId: String!
+  jwtToken: String!
+  success: Boolean!
 }
 
 type User {
@@ -159,6 +173,14 @@ type Book {
   authors: [Author]
   enhancements: [Enhancement]
   genres: [Genre]
+  hashIndex: String
+}
+
+type BookCollection {
+  id: String!
+  createdAt: String!
+  books: [Book!]!
+  user: User!
 }
 
 type BookConnection {
@@ -208,4 +230,6 @@ type EnhancementPatch {
 
 enum EnhancementType {
   summary
+  discussion
+  narration
 }

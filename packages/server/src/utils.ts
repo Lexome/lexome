@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const isObject = (value: any) => {
   return value && typeof value === 'object'
@@ -58,7 +59,15 @@ export const convertObjectPropertiesToCamelCase = <T = any>(obj: any): T  => {
   return newObject as T
 }
 
-const LOG_DIRECTORY = path.join(process.cwd(), 'logs')
+export const TEMP_DIRECTORY = path.join(process.cwd(), 'temp')
+
+export const initializeTempDirectory = () => {
+  if (!fs.existsSync(TEMP_DIRECTORY)) {
+    fs.mkdirSync(TEMP_DIRECTORY)
+  }
+}
+
+export const LOG_DIRECTORY = path.join(process.cwd(), 'logs')
 
 export const saveLog = (params: {
   message: string | Record<string, any>,
@@ -96,4 +105,22 @@ export const saveLog = (params: {
   }
 
   fs.appendFileSync(logFilePath, message)
+}
+
+export const uploadFileToS3 = async (params: {
+  file: string,
+  bucket: string,
+  key: string,
+}): Promise<string> => {
+  const s3 = new S3Client({
+    region: 'us-east-1',
+  })
+
+  await s3.send(new PutObjectCommand({
+    Bucket: params.bucket,
+    Key: params.key,
+    Body: fs.readFileSync(params.file),
+  }))
+
+  return `https://${params.bucket}.s3.amazonaws.com/${params.key}`
 }
