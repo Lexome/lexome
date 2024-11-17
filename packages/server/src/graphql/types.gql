@@ -120,6 +120,16 @@ type Mutation {
   #   type: String,
   # ): EnhancementEvent
   # deleteEnhancementEvent(id: String!): EnhancementEvent
+
+  # Auth
+  loginWithGoogle(googleAccessToken: String!): AuthResponse
+  createUserWithGoogle(googleAccessToken: String!): AuthResponse
+}
+
+type AuthResponse {
+  userId: String!
+  jwtToken: String!
+  success: Boolean!
 }
 
 type User {

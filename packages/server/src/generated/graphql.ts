@@ -16,6 +16,13 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AuthResponse = {
+  __typename?: 'AuthResponse';
+  jwtToken: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type Author = {
   __typename?: 'Author';
   books: Array<Book>;
@@ -107,7 +114,9 @@ export type Mutation = {
   createBook?: Maybe<Book>;
   createEnhancement?: Maybe<Enhancement>;
   createSubscription?: Maybe<Subscription>;
+  createUserWithGoogle?: Maybe<AuthResponse>;
   deleteBook?: Maybe<Book>;
+  loginWithGoogle?: Maybe<AuthResponse>;
 };
 
 
@@ -146,8 +155,18 @@ export type MutationCreateSubscriptionArgs = {
 };
 
 
+export type MutationCreateUserWithGoogleArgs = {
+  googleAccessToken: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteBookArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationLoginWithGoogleArgs = {
+  googleAccessToken: Scalars['String']['input'];
 };
 
 export type PageInfo = {
@@ -310,6 +329,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AuthResponse: ResolverTypeWrapper<AuthResponse>;
   Author: ResolverTypeWrapper<Author>;
   AuthorConnection: ResolverTypeWrapper<AuthorConnection>;
   Book: ResolverTypeWrapper<Book>;
@@ -334,6 +354,7 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AuthResponse: AuthResponse;
   Author: Author;
   AuthorConnection: AuthorConnection;
   Book: Book;
@@ -352,6 +373,13 @@ export type ResolversParentTypes = {
   String: Scalars['String']['output'];
   Subscription: {};
   User: User;
+};
+
+export type AuthResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthResponse'] = ResolversParentTypes['AuthResponse']> = {
+  jwtToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Author'] = ResolversParentTypes['Author']> = {
@@ -433,7 +461,9 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationCreateBookArgs, 'title'>>;
   createEnhancement?: Resolver<Maybe<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<MutationCreateEnhancementArgs, 'bookId' | 'includedTypes' | 'title'>>;
   createSubscription?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType, RequireFields<MutationCreateSubscriptionArgs, 'enhancementId'>>;
+  createUserWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationCreateUserWithGoogleArgs, 'googleAccessToken'>>;
   deleteBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationDeleteBookArgs, 'id'>>;
+  loginWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationLoginWithGoogleArgs, 'googleAccessToken'>>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
@@ -476,6 +506,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type Resolvers<ContextType = any> = {
+  AuthResponse?: AuthResponseResolvers<ContextType>;
   Author?: AuthorResolvers<ContextType>;
   AuthorConnection?: AuthorConnectionResolvers<ContextType>;
   Book?: BookResolvers<ContextType>;
