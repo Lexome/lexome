@@ -73,6 +73,7 @@ type Mutation {
     title: String!,
     bookId: String!,
     includedTypes: [EnhancementType!]!,
+    isDefault: Boolean,
   ): Enhancement
 
   #createGenre(
@@ -122,7 +123,7 @@ type Mutation {
   # deleteEnhancementEvent(id: String!): EnhancementEvent
 
   # Auth
-  loginWithGoogle(googleAccessToken: String!): AuthResponse
+  logInWithGoogle(googleAccessToken: String!): AuthResponse
   createUserWithGoogle(googleAccessToken: String!): AuthResponse
 }
 
@@ -205,6 +206,7 @@ type Enhancement {
   coalescedData: String!
   coalescedTimestamp: String!
   patches: [EnhancementPatch!]!
+  isDefault: Boolean
 }
 
 type Subscription {
@@ -230,6 +232,6 @@ type EnhancementPatch {
 
 enum EnhancementType {
   summary
-  discussion
+  notes
   narration
 }

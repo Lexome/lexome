@@ -3,6 +3,7 @@ export {
 } from "./generated/graphql"
 
 export { buildEnhancementPatch } from "./services/enhancements/core/buildEnhancementPatch"
+export { buildNotesMessagePatch } from "./services/enhancements/operations/buildNotesMessagePatch"
 export { validateEnhancementPatch } from "./services/enhancements/core/validateEnhancementPatch"
 export { enhancementTypeSpecs } from "./services/enhancements/core/enhancementTypeSpecs"
 export { applyEnhancementPatches } from "./services/enhancements/core/applyEnhancementPatches"

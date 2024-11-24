@@ -1,9 +1,9 @@
 import { EnhancementType } from "../../../generated/graphql"
 import { summarySchema } from "../schemas/summary-v1";
-import { discussionSchema } from "../schemas/discussion-v1";
+import { notesSchema } from "../schemas/notes-v1";
 import { narrationSchema } from "../schemas/narration-v1";
 import { EnhancementTypeSpec } from "../types";
-import { discussionAuthorizor } from "../authorizors/discussion";
+import { notesAuthorizor } from "../authorizors/notes";
 
 export const enhancementTypeSpecs: EnhancementTypeSpec = {
   [EnhancementType.Summary]: {
@@ -12,11 +12,11 @@ export const enhancementTypeSpecs: EnhancementTypeSpec = {
     displayName: "Summary",
   },
 
-  [EnhancementType.Discussion]: {
-    slug: EnhancementType.Discussion,
-    schema: discussionSchema,
-    displayName: "Discussion",
-    authorizor: discussionAuthorizor
+  [EnhancementType.Notes]: {
+    slug: EnhancementType.Notes,
+    schema: notesSchema,
+    displayName: "Notes",
+    authorizor: notesAuthorizor
   },
 
   [EnhancementType.Narration]: {

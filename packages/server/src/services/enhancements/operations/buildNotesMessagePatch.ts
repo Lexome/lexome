@@ -1,11 +1,11 @@
 import { v4 as uuid } from 'uuid'
 import { buildEnhancementPatch } from '../core/buildEnhancementPatch'
 import { EnhancementType } from '../../../generated/graphql'
-import { Discussion, Reply, Thread } from '../schemas/discussion-v1'
+import { Notes, Reply, Thread } from '../schemas/notes-v1'
 import { Anchor } from '../schemas/shared/anchor-v1'
 
-export const buildDiscussionMessagePatch = (params: {
-  data: Discussion,
+export const buildNotesMessagePatch = (params: {
+  data: Notes,
   userId: string,
   userDisplayName: string,
   message: string,
@@ -18,7 +18,7 @@ export const buildDiscussionMessagePatch = (params: {
     message,
     replyParents,
     anchor,
-    data: discussion
+    data: notes
   } = params
 
   const updatePath: (string | number)[] = ['threads']
@@ -39,12 +39,12 @@ export const buildDiscussionMessagePatch = (params: {
   }
 
   if (replyParents && replyParents.length > 0) {
-    let threads: (Reply | Thread)[] = discussion.threads
+    let threads: (Reply | Thread)[] = notes.threads
 
     while (replyParents.length > 0) {
       const replyParent = replyParents.shift()
       const foundIndex = threads.findIndex(thread => thread.id === replyParent)
-      const parent = discussion.threads[foundIndex]
+      const parent = notes.threads[foundIndex]
       updatePath.push(foundIndex)
       updatePath.push('replies')
 
@@ -58,7 +58,7 @@ export const buildDiscussionMessagePatch = (params: {
     }
 
     return buildEnhancementPatch({
-      enhancementType: EnhancementType.Discussion,
+      enhancementType: EnhancementType.Notes,
       path: updatePath as any,
       operation: {
         op: 'add',
@@ -75,7 +75,7 @@ export const buildDiscussionMessagePatch = (params: {
     }
 
     return buildEnhancementPatch({
-      enhancementType: EnhancementType.Discussion,
+      enhancementType: EnhancementType.Notes,
       path: updatePath as any,
       operation: {
         op: 'add',

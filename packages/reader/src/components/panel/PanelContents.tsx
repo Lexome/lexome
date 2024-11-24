@@ -2,8 +2,8 @@ import { Col, Row } from '@style-kit-n/web'
 import { ButtonSliderMenu } from '@/components/design-system/ButtonSliderMenu'
 import { useEnhancementPanelState } from '@/hooks/useEnhancementPanelState'
 import { EnhancementType } from '@lexome/core'
-import { useSubscribedEnhancements } from '@/hooks/data/useSubscribedEnhancements'
-import { useMemo } from 'react'
+import { useGenerateDefaultDiscussionEnhancement, useSubscribedEnhancements } from '@/hooks/data/useSubscribedEnhancements'
+import { use, useMemo } from 'react'
 import { useBookMetadata } from '@/hooks/data/useBookMetadata'
 
 
@@ -18,6 +18,7 @@ const enhancementTypeMenuSpec: EnhancementTypeMenuSpec = [
 
 const PanelMenu = () => {
   const { data: subscribedEnhancements } = useSubscribedEnhancements()
+  useGenerateDefaultDiscussionEnhancement()
 
   const { data: bookMetadata } = useBookMetadata()
 

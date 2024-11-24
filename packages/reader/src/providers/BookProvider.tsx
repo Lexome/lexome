@@ -64,7 +64,6 @@ const useReaderDimensions = () => {
   const panelWidth = getRightPanelWidth({
     windowWidth: width,
     rightPanelState,
-    leftPanelState
   })
 
   return useMemo(() => ({
@@ -144,8 +143,6 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
     rendition.on('relocated', () => {
       const location = rendition?.location
       const contents: any = rendition.getContents()
-
-      console.log(contents.length)
 
       for (const content of contents) {
         let startRange = content.range(location.start.cfi);

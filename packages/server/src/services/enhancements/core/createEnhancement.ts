@@ -7,8 +7,9 @@ export const createEnhancement = async (params: {
   bookId: string,
   publisherId?: string,
   userId?: string,
+  isDefault?: boolean,
 }) => {
-  const { publisherId, userId, bookId, includedTypes, title } = params
+  const { publisherId, userId, bookId, includedTypes, title, isDefault } = params
 
   const existingEnhancement = await prisma.enhancement.findFirst({
     where: {
@@ -39,6 +40,7 @@ export const createEnhancement = async (params: {
           id: publisherId,
         },
       } : undefined,
+      is_default: isDefault,
     }
   })
 

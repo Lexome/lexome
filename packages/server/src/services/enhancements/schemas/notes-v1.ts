@@ -34,12 +34,12 @@ export type Thread = Omit<zod.infer<typeof threadSchema>, "replies"> & {
   replies: Reply[];
 }
 
-export type Discussion = {
+export type Notes = {
   threads: Thread[];
   repliesAllowed: boolean;
 }
 
-export const discussionSchema = zod.object({
+export const notesSchema = zod.object({
   threads: threadSchema.array(),
   repliesAllowed: zod.boolean(),
 })

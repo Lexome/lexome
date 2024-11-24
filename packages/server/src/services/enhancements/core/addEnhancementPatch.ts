@@ -8,7 +8,7 @@ import {
   validateEnhancementPatch,
 } from "./validateEnhancementPatch";
 
-import { SuperUserString, SUPER_USER_STRING } from "./constants";
+import { SuperUserString, SUPER_USER_STRING } from "../constants";
 
 export async function addEnhancementPatch(params: {
   enhancementId: string,

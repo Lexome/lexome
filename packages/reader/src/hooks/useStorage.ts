@@ -26,7 +26,7 @@ class StorageAdaptor implements _Storage {
 
   constructor(prefix?: string) {
     if (isBrowser) {
-      this.storage = window.sessionStorage || fallbackStorage
+      this.storage = window.localStorage || fallbackStorage
     } else {
       this.storage = fallbackStorage
     }
@@ -38,11 +38,11 @@ class StorageAdaptor implements _Storage {
   }
 
   getItem(key: string) {
-    return this.storage.getItem(this.getStorageKey(key))
+    return JSON.parse(this.storage.getItem(this.getStorageKey(key)) || '{}')
   }
 
-  setItem(key: string, value: string) {
-    this.storage.setItem(this.getStorageKey(key), value)
+  setItem(key: string, value: any) {
+    this.storage.setItem(this.getStorageKey(key), JSON.stringify(value))
   }
 }
 
@@ -52,4 +52,16 @@ export const useStorage = (prefix?: string) => {
   }, [prefix])
 
   return storage
+}
+
+export const useStoredValue = <V>(key: string, defaultValue: V) => {
+  const storage = useStorage()
+  const [value, setValue] = React.useState<V>(storage.getItem(key) || defaultValue)
+
+  const set = (value: V) => {
+    storage.setItem(key, value)
+    setValue(value)
+  }
+
+  return [value, set] as const
 }
