@@ -1,4 +1,3 @@
-import { useSharedState } from "@/hooks/useSharedState"
 import { useBookMetadata } from "./data/useBookMetadata"
 import { createHashes } from "@lexome/core"
 

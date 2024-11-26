@@ -18,9 +18,19 @@ import { BUTTON_SIZE, BUTTON_TYPE, Button } from '@/components/design-system/But
 
 import logo from '../../static/logo.svg'
 import { LogInModal, useLogInModalState } from '@/components/LogInModal'
+import { useAuth } from '@/hooks/useAuth'
 
 export default () => {
-  const [query, setQuery] = useSharedState<string>('main-query', '')
+  useAuth()
+
+  const [query, setQuery] = useSharedState<string>({
+    key: 'main-query',
+    initialValue: ''
+  })
+
+
+  console.log(query)
+
   const { openModal } = useLogInModalState()
 
   const debouncedQuery = useDebouncedValue(query, 500)

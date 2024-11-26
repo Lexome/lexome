@@ -7,6 +7,7 @@ import { useListenForGoogleAuthToken } from '@/hooks/useSetGoogleAuthToken';
 import { useLogInWithGoogle } from '@/hooks/data/useLogInWithGoogle';
 import { useStoredValue } from '@/hooks/useStorage';
 import { useSharedState } from '@/hooks/useSharedState';
+import { STATE_KEYS } from '@/stateKeys';
 
 const ModalOverlay = styled('div', {
   styles: {
@@ -58,7 +59,7 @@ function oauthSignIn() {
 export const LogInButton = ({ onLoginSuccess }: { onLoginSuccess: (token: string) => void }) => {
   const [waitingForAuth, setWaitingForAuth] = useState(false)
   const logInWithGoogle = useLogInWithGoogle()
-  const [_, setJwtToken] = useStoredValue('jwtToken', '')
+  const [_, setJwtToken] = useStoredValue(STATE_KEYS.JWT_TOKEN, '')
   const listenForGoogleAuthToken = useListenForGoogleAuthToken()
 
   const handleClick = async () => {
@@ -69,6 +70,7 @@ export const LogInButton = ({ onLoginSuccess }: { onLoginSuccess: (token: string
     logInWithGoogle.mutate(token, {
       onSuccess: (data) => {
         const token = data.logInWithGoogle!.jwtToken
+        console.log('loggin in with token', token)
         setJwtToken(token)
         onLoginSuccess(token)
       }
@@ -89,7 +91,10 @@ export const LogInButton = ({ onLoginSuccess }: { onLoginSuccess: (token: string
 };
 
 export const useLogInModalState = () => {
-  const [isLoginModalOpen, setModalState] = useSharedState<boolean>('login-modal-state', false)
+  const [isLoginModalOpen, setModalState] = useSharedState({
+    key: 'login-modal-state',
+    initialValue: false
+  })
   return {
     isLoginModalOpen,
     openModal: () => setModalState(true),

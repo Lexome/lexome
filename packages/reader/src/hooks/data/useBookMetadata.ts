@@ -34,6 +34,8 @@ export const useBookMetadata = () => {
         }
       })
 
+      console.log(data, 'here 1')
+
 
       if (!data.getBook) return null
 

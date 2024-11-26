@@ -6,15 +6,15 @@ import { useEffect, useMemo } from 'react'
 export const useEnhancementPanelState = () => {
   const {data: subscribedEnhancments} = useSubscribedEnhancements()
 
-  const [selectedEnhancementType, setSelectedEnhancementType] = useSharedState<EnhancementType>(
-    'enhancement-panel-type',
-    EnhancementType.Summary
-  )
+  const [selectedEnhancementType, setSelectedEnhancementType] = useSharedState<EnhancementType>({
+    key: 'enhancement-panel-type',
+    initialValue: EnhancementType.Summary
+  })
 
-  const [selectedEnhancementId, setSelectedEnhancementId] = useSharedState<string>(
-    'enhancement-panel-id',
-    ''
-  )
+  const [selectedEnhancementId, setSelectedEnhancementId] = useSharedState<string>({
+    key: 'enhancement-panel-id',
+    initialValue: ''
+  })
 
   useEffect(() => {
     if (!subscribedEnhancments || selectedEnhancementId) return

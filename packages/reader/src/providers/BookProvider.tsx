@@ -9,6 +9,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { useBookMetadata } from '@/hooks/data/useBookMetadata'
 import { useSharedState } from '@/hooks/useSharedState'
 import { useFindTextInIndex } from '@/hooks/useFindTextInIndex'
+import { useStylePreferences, COLOR_SCHEME_NAME } from '@/hooks/useStylePreferences'
 
 const MAX_READABLE_WIDTH = 650
 
@@ -19,7 +20,10 @@ type Enhancement = {
 }
 
 const useFocusManager = (book: Book) => {
-  const focused = useSharedState('highlights', null)
+  const [focused, setFocused] = useSharedState<string | null>({
+    key: 'highlights',
+    initialValue: null
+  })
 
   const focusNextSentence = () => {
 
@@ -91,8 +95,23 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
   const {data: bookMetadata, isLoading: isBookMetadataLoading} = useBookMetadata()
 
   const hashIndex = bookMetadata?.hashIndex
-  const [hashIndexStartCursor, setHashIndexStartCursor] = useSharedState('hashIndexStartCursor', 0)
-  const hashIndexEndCursor = useSharedState('hashIndexEndCursor', 0)
+  const [hashIndexStartCursor, setHashIndexStartCursor] = useSharedState<number>({
+    key: 'hashIndexStartCursor',
+    initialValue: 0
+  })
+  const [hashIndexEndCursor, setHashIndexEndCursor] = useSharedState<number>({
+    key: 'hashIndexEndCursor',
+    initialValue: 0
+  })
+
+  const {
+    fontSize,
+    colorScheme,
+    fontFamily,
+    setFontSize,
+    setColorScheme,
+    setFontFamily
+  } = useStylePreferences()
 
   const findTextInIndex = useFindTextInIndex()
 
@@ -164,7 +183,7 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
       {
         "p": {
           "margin-top": "8px",
-          "font-size": "18px",
+          "font-size": "20px",
           "line-height": "1.5",
           "margin-bottom": "16px",
           "color": '#555555',

@@ -18,7 +18,7 @@ const enhancementTypeMenuSpec: EnhancementTypeMenuSpec = [
 
 const PanelMenu = () => {
   const { data: subscribedEnhancements } = useSubscribedEnhancements()
-  useGenerateDefaultDiscussionEnhancement()
+  // useGenerateDefaultDiscussionEnhancement()
 
   const { data: bookMetadata } = useBookMetadata()
 
@@ -42,8 +42,6 @@ const PanelMenu = () => {
   const handleChange = (value: string) => {
     setSelectedEnhancementType(value as EnhancementType)
   }
-
-  console.log(selectedEnhancementData, 'selectedEnhancementData')
 
   return (
     <Row

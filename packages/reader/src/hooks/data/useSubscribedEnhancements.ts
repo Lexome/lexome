@@ -45,23 +45,23 @@ export const useSubscribedEnhancements = () => {
 }
 
 export const useGenerateDefaultDiscussionEnhancement = () => {
-  const { bookId } = useQueryParams()
-  const createEnhancement = useCreateEnhancement()
-  const queryClient = useQueryClient()
+  // const { bookId } = useQueryParams()
+  // const createEnhancement = useCreateEnhancement()
+  // const queryClient = useQueryClient()
 
-  if (!bookId) {
-    return {
-      data: undefined
-    }
-  }
+  // if (!bookId) {
+  //   return {
+  //     data: undefined
+  //   }
+  // }
 
   const { data } = useSubscribedEnhancements()
 
-  if (!data) {
-    return {
-      data: undefined
-    }
-  }
+  // if (!data) {
+  //   return {
+  //     data: undefined
+  //   }
+  // }
 
   const enhancements = data?.getSubscribedEnhancementsForBook
 
