@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { PreventSsr } from '@/components/PreventSsr'
 import { useStoreBookList } from '@/hooks/data/useStoreBookList'
-import { Layout, Main, NavItem, NavTopItems, ReadableWidth, SideNav } from '@/components/layout'
+import { Layout, Main, NavItem, NavTopItems, ReadableWidth, SideNav, TopRightContent } from '@/components/layout'
 
 import LibraryIcon from '@mui/icons-material/AccountBalance'
 import CollectionIcon from '@mui/icons-material/Bookmarks'
@@ -17,9 +17,11 @@ import { Row } from '@/components/design-system/Row'
 import { BUTTON_SIZE, BUTTON_TYPE, Button } from '@/components/design-system/Button'
 
 import logo from '../../static/logo.svg'
+import { LogInModal, useLogInModalState } from '@/components/LogInModal'
 
 export default () => {
-  const [query, setQuery] =  useSharedState<string>('main-query', '')
+  const [query, setQuery] = useSharedState<string>('main-query', '')
+  const { openModal } = useLogInModalState()
 
   const debouncedQuery = useDebouncedValue(query, 500)
 
@@ -107,7 +109,7 @@ export default () => {
                 {data?.getBooks?.records?.map((book) => (
                   <Row mx={3} my={4}>
                     <Card
-                      imageUri={book.coverUrl}
+                      imageUri={book.coverUrl ?? ''}
                       imageHeight="300px"
                       imageWidth="200px"
                       imageFit={CARD_IMAGE_FIT.CONTAIN}
@@ -150,7 +152,17 @@ export default () => {
               </Row>
             </Column>
           </ReadableWidth>
+          <TopRightContent>
+            <Row p={3}>
+              <Button
+                onClick={openModal}
+                label="Log In"
+                type={BUTTON_TYPE.TEXT}
+              />
+            </Row>
+          </TopRightContent>
         </Main>
+        <LogInModal />
       </Layout>
     </PreventSsr>
   ) 

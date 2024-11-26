@@ -79,6 +79,7 @@ export type Enhancement = {
   createdAt: Scalars['String']['output'];
   id: Scalars['String']['output'];
   includedTypes: Array<EnhancementType>;
+  isDefault?: Maybe<Scalars['Boolean']['output']>;
   patches: Array<EnhancementPatch>;
   subscriptions: Array<Subscription>;
   title: Scalars['String']['output'];
@@ -94,8 +95,8 @@ export type EnhancementPatch = {
 };
 
 export enum EnhancementType {
-  Discussion = 'discussion',
   Narration = 'narration',
+  Notes = 'notes',
   Summary = 'summary'
 }
 
@@ -116,7 +117,7 @@ export type Mutation = {
   createSubscription?: Maybe<Subscription>;
   createUserWithGoogle?: Maybe<AuthResponse>;
   deleteBook?: Maybe<Book>;
-  loginWithGoogle?: Maybe<AuthResponse>;
+  logInWithGoogle?: Maybe<AuthResponse>;
 };
 
 
@@ -145,6 +146,7 @@ export type MutationCreateBookArgs = {
 export type MutationCreateEnhancementArgs = {
   bookId: Scalars['String']['input'];
   includedTypes: Array<EnhancementType>;
+  isDefault?: InputMaybe<Scalars['Boolean']['input']>;
   title: Scalars['String']['input'];
 };
 
@@ -165,7 +167,7 @@ export type MutationDeleteBookArgs = {
 };
 
 
-export type MutationLoginWithGoogleArgs = {
+export type MutationLogInWithGoogleArgs = {
   googleAccessToken: Scalars['String']['input'];
 };
 
@@ -432,6 +434,7 @@ export type EnhancementResolvers<ContextType = any, ParentType extends Resolvers
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   includedTypes?: Resolver<Array<ResolversTypes['EnhancementType']>, ParentType, ContextType>;
+  isDefault?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   patches?: Resolver<Array<ResolversTypes['EnhancementPatch']>, ParentType, ContextType>;
   subscriptions?: Resolver<Array<ResolversTypes['Subscription']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -463,7 +466,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createSubscription?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType, RequireFields<MutationCreateSubscriptionArgs, 'enhancementId'>>;
   createUserWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationCreateUserWithGoogleArgs, 'googleAccessToken'>>;
   deleteBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationDeleteBookArgs, 'id'>>;
-  loginWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationLoginWithGoogleArgs, 'googleAccessToken'>>;
+  logInWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationLogInWithGoogleArgs, 'googleAccessToken'>>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {

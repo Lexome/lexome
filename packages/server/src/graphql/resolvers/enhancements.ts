@@ -1,6 +1,6 @@
 import { enhancement } from "@prisma/client";
 
-import { convertObjectPropertiesToCamelCase, convertObjectPropertiesToSnakeCase } from "../../utils";
+import { convertObjectPropertiesToCamelCase } from "../../utils";
 import { createEnhancement } from "../../services/enhancements/core/createEnhancement";
 import { prisma } from "../../prisma";
 import { coalesceEnhancementDataById } from "../../services/enhancements/core/coalesceEnhancementData";
@@ -113,13 +113,14 @@ export const resolvers: Resolvers = {
     },
 
     createEnhancement: async (_, args, context) => {
-      const { bookId, title, includedTypes } = args;
+      const { bookId, title, includedTypes, isDefault } = args;
       const user = context.user;
 
       const enhancement = await createEnhancement({
         bookId,
         title,
-        includedTypes
+        includedTypes,
+        isDefault: isDefault || false
       })
 
       return convertObjectPropertiesToCamelCase(enhancement);

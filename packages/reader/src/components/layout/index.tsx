@@ -9,8 +9,9 @@ export const Layout = styled('div', {
   styles: {
     display: 'flex',
     flexDirection: 'row',
-    height: '100vw',
+    height: '100vh',
     width: '100vw',
+    overflow: 'hidden',
   }
 })
 
@@ -20,6 +21,15 @@ export const Main = styled('main', {
     flex: 1,
     overflow: 'auto',
     height: '100vh',
+    position: 'relative',
+  }
+})
+
+export const TopRightContent = styled('div', {
+  styles: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
   }
 })
 

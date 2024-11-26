@@ -40,8 +40,8 @@ export const colors = {
   [COLOR.DARK_GRAY]: '#cccccc',
   [COLOR.GRAY]: '#767676',
   [COLOR.LIGHT_GRAY]: '#dddddd',
-  [COLOR.FAINT_GRAY]: '#f5f5f5',
+  [COLOR.FAINT_GRAY]: '#f9f9f9',
   [COLOR.WHITE]: '#ffffff',
-  [COLOR.OFF_WHITE]: '#fafafa',
+  [COLOR.OFF_WHITE]: '#fbfbfb',
   [COLOR.TRANSPARENT]: 'rgba(0, 0, 0, 0)',
 }

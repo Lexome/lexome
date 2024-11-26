@@ -2,7 +2,7 @@ import { EnhancementType } from "../../generated/graphql";
 
 import { subscription } from "@prisma/client";
 import { Operation } from "fast-json-patch";
-import { SuperUserString } from "./core/constants";
+import { SuperUserString } from "./constants";
 import { Enhancements } from "./schemas";
 
 export type Authorizor<Type extends EnhancementType = any> = (params: {

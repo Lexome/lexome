@@ -2,7 +2,7 @@ import { EnhancementType } from "../../../generated/graphql"
 import { applyOperation, Operation } from "fast-json-patch"
 import { enhancementTypeSpecs } from "./enhancementTypeSpecs"
 import { subscription } from "@prisma/client"
-import { SuperUserString, SUPER_USER_STRING } from "./constants"
+import { SuperUserString, SUPER_USER_STRING } from "../constants"
 import { Enhancements } from "../schemas"
 
 export const validateEnhancementPatch = async (params: {

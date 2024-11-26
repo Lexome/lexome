@@ -1,8 +1,8 @@
 import { EnhancementType } from "../../../generated/graphql";
-import { SUPER_USER_STRING } from "../core/constants";
+import { SUPER_USER_STRING } from "../constants";
 import { Authorizor } from "../types";
 
-export const discussionAuthorizor: Authorizor<EnhancementType.Discussion> = async ({ enhancementData, patch, subscription }) => {
+export const notesAuthorizor: Authorizor<EnhancementType.Notes> = async ({ enhancementData, patch, subscription }) => {
   if (patch.op !== 'add') {
     return false
   }

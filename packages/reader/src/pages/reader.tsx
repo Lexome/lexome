@@ -1,24 +1,24 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Row } from '@style-kit-n/web'
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
+import LaunchIcon from '@mui/icons-material/Launch'
+import { useDrag } from '@use-gesture/react';
 
 import {
-  LEFT_PANEL_STATE,
   RIGHT_PANEL_STATE,
   getRightPanelPx,
   getRightPanelWidth,
-  useLeftPanel,
   useRightPanel
 } from '@/hooks/usePanel'
 import { BookProvider, useBook } from '@/providers/BookProvider'
-import { Button, BUTTON_TYPE } from '../components/design-system/Button';
+import { Button, BUTTON_SIZE, BUTTON_TYPE } from '@/components/design-system/Button';
 import { PanelContents } from '@/components/panel/PanelContents';
-
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import { styled } from '@/theme';
-import { useDrag } from '@use-gesture/react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PreventSsr } from '@/components/PreventSsr';
+import { COLOR } from '@/theme/colors';
+import { Column } from '@/components/design-system/Column';
 
 // const slideIn = stylex.keyframes({
 //   '0%': {transform: 'translateX(0%)'},
@@ -31,9 +31,7 @@ import { PreventSsr } from '@/components/PreventSsr';
 // });
 
 const RIGHT_LIP_WIDTH = 48
-const LEFT_LIP_WIDTH = 48
 const RIGHT_DRAG_TARGET_BUFFER = 48
-const LEFT_DRAG_TARGET_BUFFER = 48
 
 const ReaderWrapper = styled<{
   wrapperWidth: string
@@ -70,41 +68,26 @@ const PanelTouchContainer = styled(
 const Panel = styled(
   'div',
   {
+    bg: COLOR.OFF_WHITE,
     styles: {
-      backgroundColor: '#f5f5f5',
       height: '100vh',
-      boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.1)',
+     boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.1)',
       display: 'flex',
       flexDirection: 'row',
     }
   }
 )
 
-const LeftPanelTouchContainer = styled<{
-  panelWidth: number
-}>(
-  PanelTouchContainer,
-  ({ panelWidth }) => ({
-    pr: 2,
+const PanelLip = styled(
+  Column, {
+    bg: COLOR.FAINT_GRAY,
     styles: {
-      right: '100%',
-      width: `${panelWidth + LEFT_DRAG_TARGET_BUFFER}px`,
-      paddingRight: `${RIGHT_DRAG_TARGET_BUFFER}px`,
-      transform: `translateX(${LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH}px)`,
-      touchAction: 'none'
+      width: `${RIGHT_LIP_WIDTH}px`,
+      borderRight: `1px solid #eeeeee`,
+      alignItems: 'center',
+      justifyContent: 'center',
     }
-  })
-)
-
-const LeftPanel = styled<{
-  panelWidth: number
-}>(
-  Panel,
-  ({ panelWidth }) => ({
-    styles: {
-      width: `${panelWidth}px`,
-    }
-  })
+  }
 )
 
 const RightPanelTouchContainer = styled<{
@@ -134,7 +117,6 @@ const RightPanel = styled<{
 )
 
 const getReaderWidth = (params: {
-  leftPanelState: LEFT_PANEL_STATE,
   rightPanelState: RIGHT_PANEL_STATE,
   windowWidth: number,
 }) => {
@@ -146,7 +128,6 @@ const getReaderWidth = (params: {
   ) {
     const rightPanelWidth = getRightPanelWidth({
       rightPanelState: params.rightPanelState,
-      leftPanelState: params.leftPanelState,
       windowWidth: params.windowWidth
     })
 
@@ -158,31 +139,25 @@ const getReaderWidth = (params: {
 
 enum PANEL_ID {
   RIGHT='right-panel',
-  LEFT='left-panel'
 }
 
 const Reader = () => {
   const [rightPanelState, setRightPanelState] = useRightPanel()
-  const [leftPanelState, setLeftPanelState] = useLeftPanel()
 
   const rightPanelPx = useMemo(() => {
     if (typeof window === 'undefined') return 0
 
     return getRightPanelPx({
       rightPanelState,
-      leftPanelState,
       windowWidth: window.innerWidth
     })
-  }, [rightPanelState, leftPanelState])
+  }, [rightPanelState])
 
   const panelAnimationState = useRef({
     [PANEL_ID.RIGHT]: 0 - RIGHT_DRAG_TARGET_BUFFER - RIGHT_LIP_WIDTH,
-    [PANEL_ID.LEFT]: LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH
   })
 
-
   const lastRightDragStartRef = useRef<number | undefined>(undefined)
-  const lastLeftDragStartRef = useRef<number | undefined>(undefined)
 
   const animateSlide = (params: {
     panelId: PANEL_ID,
@@ -214,68 +189,17 @@ const Reader = () => {
     }
 
     if (rightPanelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED) {
+      const rightPanelWidth = getRightPanelWidth({
+        rightPanelState,
+        windowWidth: window.innerWidth
+      })
+
       animateSlide({
         panelId: PANEL_ID.RIGHT,
-        to: -500
+        to: 0 - rightPanelWidth
       })
     }
   }, [rightPanelState])
-
-  useEffect(() => {
-    if (leftPanelState === LEFT_PANEL_STATE.CLOSED) {
-      animateSlide({
-        panelId: PANEL_ID.LEFT,
-        to: LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH
-      })
-    }
-
-    if (leftPanelState === LEFT_PANEL_STATE.EXPANDED) {
-      animateSlide({
-        panelId: PANEL_ID.LEFT,
-        to: 300
-      })
-    }
-  }, [leftPanelState])
-
-  const getLeftSliderProps = useDrag(({ down, movement: [mx] }) => {
-    const reachedThreshold = Math.abs(mx) > 100
-
-    if (lastLeftDragStartRef.current === undefined) {
-      lastLeftDragStartRef.current = panelAnimationState.current[PANEL_ID.LEFT]
-    }
-
-    const lastDragStart = lastLeftDragStartRef.current
-
-    if (down) {
-      animateSlide({
-        panelId: PANEL_ID.LEFT,
-        to: Math.min(lastDragStart + mx, 300)
-      })
-    }
-
-    if (!down) {
-      lastLeftDragStartRef.current = undefined
-
-      if (reachedThreshold && mx > 0) {
-        setLeftPanelState(LEFT_PANEL_STATE.EXPANDED)
-
-      } else if (reachedThreshold && mx < 0) {
-        setLeftPanelState(LEFT_PANEL_STATE.CLOSED)
-
-      } else if (leftPanelState === LEFT_PANEL_STATE.EXPANDED) {
-        animateSlide({
-          panelId: PANEL_ID.LEFT,
-          to: 300
-        })
-
-      } else if (leftPanelState === LEFT_PANEL_STATE.CLOSED) {
-        animateSlide({
-          panelId: PANEL_ID.LEFT,
-          to: LEFT_DRAG_TARGET_BUFFER + LEFT_LIP_WIDTH
-        })
-      }
-    }
-  })
 
   // Set the drag hook and define component movement based on gesture data.
   const getRightSliderProps = useDrag(({ down, movement: [mx] }) => {
@@ -323,24 +247,16 @@ const Reader = () => {
 
     return getReaderWidth({
       rightPanelState,
-      leftPanelState,
       windowWidth: window.innerWidth
     })
-  }, [rightPanelState, leftPanelState])
+  }, [rightPanelState])
 
   return (
     <ReaderContainer>
       <Row>
-        <LeftPanelTouchContainer
-          id='left-panel'
-          panelWidth={300}
-          {...getLeftSliderProps()}
-        >
-          <LeftPanel id='left-panel' panelWidth={300} />
-        </LeftPanelTouchContainer>
-
         <ReaderWrapper wrapperWidth={`${readerWidth}px`}>
           <div id="lexome_reader" />
+          <ControlPanel />
         </ReaderWrapper>
 
         <RightPanelTouchContainer
@@ -349,11 +265,11 @@ const Reader = () => {
           {...getRightSliderProps()}
         >
           <RightPanel panelWidth={rightPanelPx}>
+            <PanelLip />
             <PanelContents />
           </RightPanel>
         </RightPanelTouchContainer>
       </Row>
-      <ControlPanel />
     </ReaderContainer>
   )
 }
@@ -376,10 +292,11 @@ const ControlPanel = () => {
   const [ panelState, setPanelState ] = useRightPanel()
 
   return (
-    <div
+    <Row
       style={{
         display: 'flex',
         justifyContent: 'center',
+        alignItems: 'center',
         width: '100vw',
         position: 'absolute',
         bottom: 0,
@@ -388,28 +305,27 @@ const ControlPanel = () => {
     >
       <Button
         onClick={() => {
-          console.log("here!!! prev")
           rendition?.prev()
         }}
         label="Previous"
         type={BUTTON_TYPE.TEXT}
         leftIcon={ArrowBackIos}
       />
+
       <Button
+        label="Panel"
+        type={BUTTON_TYPE.TEXT}
+        size={BUTTON_SIZE.MD}
+        leftIcon={LaunchIcon}
         onClick={() => {
           if (
             panelState === RIGHT_PANEL_STATE.PARTIALLY_EXPANDED
           ) {
             setPanelState(RIGHT_PANEL_STATE.CLOSED)
-            // setPanelState(PANEL_STATE.FULLY_EXPANDED)
-          // } else if (panelState === PANEL_STATE.FULLY_EXPANDED) {
-            // setPanelState(PANEL_STATE.CLOSED)
           } else {
-            // setPanelState(PANEL_STATE.CLOSED)
             setPanelState(RIGHT_PANEL_STATE.PARTIALLY_EXPANDED)
           }
         }}
-        label="Test"
       />
       <Button
         label="Next"
@@ -419,7 +335,7 @@ const ControlPanel = () => {
           rendition?.next()
         }}
       />
-    </div>
+    </Row>
   )
 }
 

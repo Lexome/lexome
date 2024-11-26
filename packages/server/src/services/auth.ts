@@ -3,6 +3,11 @@ import { prisma } from '../prisma'
 
 import 'dotenv/config'
 
+const LIVE_GOOGLE_CLIENT_ID = process.env.LIVE_GOOGLE_CLIENT_ID
+const DEV_GOOGLE_CLIENT_ID = process.env.DEV_GOOGLE_CLIENT_ID
+
+const clientIds = [LIVE_GOOGLE_CLIENT_ID, DEV_GOOGLE_CLIENT_ID]
+
 export const verifyJwtToken = (token: string) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret')
 
@@ -10,8 +15,10 @@ export const verifyJwtToken = (token: string) => {
 }
 
 // Verify Google token by requesting a google token info endpoint
-export const verifyGoogleToken = async (params: { token: string, clientId: string }) => {
-  const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo')
+export const verifyGoogleToken = async (params: { token: string }) => {
+  const { token } = params
+
+  const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${token}`)
   
   if (!response.ok) {
     throw new Error('Failed to verify Google token')
@@ -19,7 +26,7 @@ export const verifyGoogleToken = async (params: { token: string, clientId: strin
 
   const payload = await response.json()
 
-  if (payload.aud !== params.clientId) {
+  if (!clientIds.includes(payload.aud)) {
     throw new Error('Token not issued for this client')
   }
 
@@ -29,10 +36,7 @@ export const verifyGoogleToken = async (params: { token: string, clientId: strin
 export const loginWithGoogle = async (params: { token: string }) => {
   const { token } = params
 
-  const { email } = await verifyGoogleToken({
-    token,
-    clientId: process.env.GOOGLE_CLIENT_ID || ''
-  })
+  const { email } = await verifyGoogleToken({ token })
 
   // Find user by email
   const user = await prisma.user.findFirst({
@@ -62,7 +66,7 @@ export const createUserWithGoogle = async (params: { token: string }) => {
     return { error: 'Google token is required' }
   }
 
-  const { email } = await verifyGoogleToken({ token, clientId: process.env.GOOGLE_CLIENT_ID || '' })
+  const { email } = await verifyGoogleToken({ token })
 
   if (await prisma.user.findUnique({ where: { email } })) {
     return { error: 'User already exists' }

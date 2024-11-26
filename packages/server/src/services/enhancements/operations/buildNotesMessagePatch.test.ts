@@ -1,11 +1,11 @@
-import { Discussion } from '../schemas/discussion-v1'
-import { buildDiscussionMessagePatch } from './buildDiscussionMessagePatch'
+import { Notes } from '../schemas/notes-v1'
+import { buildNotesMessagePatch } from './buildNotesMessagePatch'
 import { v4 as uuidv4 } from 'uuid'
 
-describe('buildDiscussionMessagePatch', () => {
+describe('buildNotesMessagePatch', () => {
   // creates thread reply 
   it('creates top level thread', () => {
-    const patch = buildDiscussionMessagePatch({
+    const patch = buildNotesMessagePatch({
       data: {} as any,
       userId: '123',
       anchor: {
@@ -40,7 +40,7 @@ describe('buildDiscussionMessagePatch', () => {
   it('creates reply', () => {
     const replyParentId = uuidv4()
 
-    const patch = buildDiscussionMessagePatch({
+    const patch = buildNotesMessagePatch({
       data: {
         repliesAllowed: true,
         threads: [
@@ -56,7 +56,7 @@ describe('buildDiscussionMessagePatch', () => {
             message: '',
           }
         ]
-      } as Discussion,
+      } as Notes,
       userId: '123',
       replyParents: [replyParentId],
       userDisplayName: 'Test User',
@@ -65,7 +65,7 @@ describe('buildDiscussionMessagePatch', () => {
 
     expect(patch).toEqual({
       op: 'add',
-      path: `/discussion/threads/${replyParentId}/replies/-1`,
+      path: `/notes/threads/${replyParentId}/replies/-1`,
       value: {
         id: expect.any(String),
         createdAt: expect.any(String),
@@ -84,7 +84,7 @@ describe('buildDiscussionMessagePatch', () => {
     const replyParentId = uuidv4()
     const replyParentId2 = uuidv4()
 
-    const patch = buildDiscussionMessagePatch({
+    const patch = buildNotesMessagePatch({
       userId: '123',
       userDisplayName: 'Test User',
       message: 'Nested reply message',
@@ -114,12 +114,12 @@ describe('buildDiscussionMessagePatch', () => {
             }],
           }
         ]
-      } as Discussion,
+      } as Notes,
     })
 
     expect(patch).toEqual({
       op: 'add',
-      path: `/discussion/threads/${replyParentId}/replies/${replyParentId2}/replies/-1`,
+      path: `/notes/threads/${replyParentId}/replies/${replyParentId2}/replies/-1`,
       value: {
         id: expect.any(String),
         createdAt: expect.any(String),

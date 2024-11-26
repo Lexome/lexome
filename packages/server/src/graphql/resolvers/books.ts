@@ -15,14 +15,7 @@ export const resolvers = {
           OR: [{
             title: { contains: query, mode: 'insensitive'},
           }, {
-            authors: {
-              some: {
-                display_name: {
-                  contains: query,
-                  mode: 'insensitive'
-                }
-              }
-            }
+            author_names_cached: { contains: query, mode: 'insensitive' }
           }]
         })
       }

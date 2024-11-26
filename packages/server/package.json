@@ -1,7 +1,7 @@
 {
   "name": "@lexome/core",
   "private": false,
-  "version": "1.0.9",
+  "version": "1.0.14",
   "description": "",
   "main": "dist/export.js",
   "files": [
@@ -12,6 +12,10 @@
     "dist/services/enhancements/core/buildEnhancementPatch.*",
     "dist/services/enhancements/core/enhancementTypeSpecs.*",
     "dist/services/enhancements/core/applyEnhancementPatches.*",
+    "dist/services/enhancements/operations/buildNotesMessagePatch.*",
+    "dist/services/enhancements/authorizors/*",
+    "dist/services/enhancements/constants.*",
+    "dist/services/enhancements/types.*",
     "dist/generated/*"
   ],
   "scripts": {

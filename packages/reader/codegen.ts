@@ -10,7 +10,8 @@ const config: CodegenConfig = {
         fragmentMasking: false
       }
     }
-  }
+  },
+  noSilentErrors: true
 }
 
 export default config
