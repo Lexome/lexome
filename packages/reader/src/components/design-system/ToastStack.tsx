@@ -6,7 +6,11 @@ import { useEffect, useRef } from "react"
 const toastStackStorageKey = 'toast-stack'
 
 const useToastStack = () => {
-  const [toastStack, setToastStack] = useSharedState<string[]>(toastStackStorageKey, [])
+  const [toastStack, setToastStack] = useSharedState<string[]>({
+    key: toastStackStorageKey,
+    initialValue: []
+  })
+
   const addToast = (toast: string) => {
     setToastStack([...toastStack, toast])
   }

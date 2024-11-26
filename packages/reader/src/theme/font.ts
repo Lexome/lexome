@@ -32,12 +32,18 @@ export const fontWeights = {
 
 export enum FONT_FAMILY {
   SANS_SERIF = 'sansSerif',
-  HEADLINE = 'headline'
+  HEADLINE = 'headline',
+  OLD_SERIF = 'oldSerif',
+  FRIENDLY_SERIF = 'friendlySerif',
+  
 }
 
 export const fontFamilies = {
   [FONT_FAMILY.SANS_SERIF]: "Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
-  [FONT_FAMILY.HEADLINE]: "Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif"
+  [FONT_FAMILY.HEADLINE]: "Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif",
+  [FONT_FAMILY.OLD_SERIF]: "'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif",
+  [FONT_FAMILY.FRIENDLY_SERIF]: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif"
+
 }
 
 export enum LINE_HEIGHT {

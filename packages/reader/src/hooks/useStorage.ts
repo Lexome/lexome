@@ -38,7 +38,12 @@ class StorageAdaptor implements _Storage {
   }
 
   getItem(key: string) {
-    return JSON.parse(this.storage.getItem(this.getStorageKey(key)) || '{}')
+    const item = this.storage.getItem(this.getStorageKey(key))
+    try {
+      return item ? JSON.parse(item) : undefined
+    } catch {
+      return undefined
+    }
   }
 
   setItem(key: string, value: any) {

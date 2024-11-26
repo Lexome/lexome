@@ -1,6 +1,7 @@
 import { RenderFunction, SharedStateContext } from "@/providers/SharedStateProvider"
 import React, { useEffect } from "react"
 import useForceRerender from "./utils/useForceRerender"
+import { useStorage } from "./useStorage"
 
 type PropertyPath = string | number | ((value: any) => any)
 
@@ -58,13 +59,25 @@ export function useSharedStateSelector<T> (key: string, propertyPath: PropertyPa
   return readValuePath(val, propertyPath) as T
 }
 
-export function useSharedState<T> (key: string, initialValue: T): [T, (value: T) => void] {
+export function useSharedState<T> (params: {
+  key: string,
+  initialValue: T,
+  shouldSaveToStorage?: boolean
+}): [T, (value: T) => void] {
+  const {
+    key,
+    initialValue,
+    shouldSaveToStorage = false
+  } = params
+
   const {
     read,
     write,
     watchForUpdates,
     endWatch
   } = React.useContext(SharedStateContext)
+
+  const storage = useStorage()
 
   const forceRerender = useForceRerender()
 
@@ -82,9 +95,15 @@ export function useSharedState<T> (key: string, initialValue: T): [T, (value: T)
 
   const update = (value: T) => {
     write(key, value)
+
+    if (shouldSaveToStorage) {
+      storage.setItem(key, value)
+    }
   }
 
-  const val = read()[key] || initialValue
+  const storedValue = shouldSaveToStorage ? storage.getItem(key) : undefined
+
+  const val = read()[key] || storedValue || initialValue
 
   return [
     val as T,
