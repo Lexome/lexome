@@ -8,7 +8,8 @@ const config: CodegenConfig = {
     "src/generated/graphql.ts": {
       plugins: ["typescript", "typescript-resolvers"]
     }
-  }
+  },
+  noSilentErrors: true
 };
 
 export default config;

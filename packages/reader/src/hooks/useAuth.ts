@@ -1,7 +1,9 @@
-import { STATE_KEYS } from "@/stateKeys"
-import { useStoredValue } from "./useStorage"
+import { STATE_KEY } from "@/constants"
+import { useStorage, useStoredValue } from "./useStorage"
+import { useSharedState } from "./useSharedState"
+import { useEffect, useState } from "react"
 
-const parseJwtToken = (jwt: string) => {
+const parseJwt = (jwt: string) => {
   if (!jwt) return null
 
   try {
@@ -14,14 +16,63 @@ const parseJwtToken = (jwt: string) => {
   }
 }
 
-export const useAuth = () => {
-  const [jwtToken] = useStoredValue(STATE_KEYS.JWT_TOKEN, '')
+export const useJwt = () => {
+  return useSharedState({
+    key: STATE_KEY.JWT,
+    initialValue: '',
+    shouldSaveToStorage: true
+  })
+}
 
-  console.log(parseJwtToken(jwtToken), 'parsed jwt token')
+export const useAuthData = () => {
+  const [jwt] = useJwt()
 
-  if (jwtToken) {
-    return parseJwtToken(jwtToken)
+  if (jwt) {
+    return parseJwt(jwt)
   }
 
   return null
+}
+
+export const useWatchForJwtInStorage = (params: {
+  onReceiveJwt: (jwt: string) => void,
+  watchImmediately?: boolean,
+  watchInterval?: number
+}) => {
+  const { onReceiveJwt, watchImmediately = false, watchInterval = 1000 } = params
+
+  const [, setJwt] = useJwt()
+  const [isWatching, setIsWatching] = useState(watchImmediately)
+  const storage = useStorage()
+
+  useEffect(() => {
+    if (!isWatching) return
+
+    const interval = setInterval(() => {
+      const jwt = storage.getStorageKey(STATE_KEY.JWT)
+
+      if (jwt) {
+        setJwt(jwt)
+        onReceiveJwt(jwt)
+      }
+    }, watchInterval)
+
+    return () => clearInterval(interval)
+  }, [storage, isWatching, onReceiveJwt])
+
+  return (isWatching: boolean) => {
+    setIsWatching(isWatching)
+  }
+}
+
+export const useAuthHeaders = (): {
+  Authorization?: string
+} => {
+  const [jwt] = useJwt()
+
+  if (!jwt) return {}
+
+  return {
+    Authorization: `Bearer ${jwt}`
+  }
 }

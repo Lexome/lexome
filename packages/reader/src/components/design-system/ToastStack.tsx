@@ -2,12 +2,11 @@ import { useSharedState } from "@/hooks/useSharedState"
 import { styled } from "@/theme"
 import { Column } from "@/components/design-system/Column"
 import { useEffect, useRef } from "react"
+import { STATE_KEY } from "@/constants"
 
-const toastStackStorageKey = 'toast-stack'
-
-const useToastStack = () => {
+export const useToastStack = () => {
   const [toastStack, setToastStack] = useSharedState<string[]>({
-    key: toastStackStorageKey,
+    key: STATE_KEY.TOAST_STACK,
     initialValue: []
   })
 
@@ -30,8 +29,8 @@ const ToastWrapper = styled(Column, {
   }
 })
 
-const ToastStack = () => {
-  const { toastStack, addToast } = useToastStack()
+export const ToastStack = () => {
+  const { toastStack } = useToastStack()
   const ref = useRef<HTMLDivElement>(null)
 
   const numToasts = toastStack.length

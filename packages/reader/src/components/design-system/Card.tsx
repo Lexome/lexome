@@ -20,9 +20,9 @@ export const CardContainer = styled<CardContainerProps>(
     layout = CARD_LAYOUT.VERTICAL,
     clickable = false
   }: CardContainerProps) => ({
-    bg: COLOR.WHITE,
+    bg: COLOR.BACKGROUND_STRONG,
     border: '1px solid',
-    borderColor: COLOR.LIGHT_GRAY,
+    borderColor: COLOR.PRIMARY_FAINT,
     styles: {
       display: 'flex',
       flexDirection: layout === CARD_LAYOUT.VERTICAL ? 'column' : 'row',

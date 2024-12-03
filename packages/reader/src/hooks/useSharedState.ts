@@ -2,6 +2,7 @@ import { RenderFunction, SharedStateContext } from "@/providers/SharedStateProvi
 import React, { useEffect } from "react"
 import useForceRerender from "./utils/useForceRerender"
 import { useStorage } from "./useStorage"
+import { STATE_KEY } from "@/constants"
 
 type PropertyPath = string | number | ((value: any) => any)
 
@@ -60,7 +61,7 @@ export function useSharedStateSelector<T> (key: string, propertyPath: PropertyPa
 }
 
 export function useSharedState<T> (params: {
-  key: string,
+  key: STATE_KEY,
   initialValue: T,
   shouldSaveToStorage?: boolean
 }): [T, (value: T) => void] {

@@ -1,15 +1,13 @@
 import jwt from 'jsonwebtoken'
 import { prisma } from '../prisma'
-
-import 'dotenv/config'
-
-const LIVE_GOOGLE_CLIENT_ID = process.env.LIVE_GOOGLE_CLIENT_ID
-const DEV_GOOGLE_CLIENT_ID = process.env.DEV_GOOGLE_CLIENT_ID
+import { sendEmail } from './email'
+import { user } from '@prisma/client'
+import { LIVE_GOOGLE_CLIENT_ID, DEV_GOOGLE_CLIENT_ID, JWT_SECRET } from '../config'
 
 const clientIds = [LIVE_GOOGLE_CLIENT_ID, DEV_GOOGLE_CLIENT_ID]
 
 export const verifyJwtToken = (token: string) => {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret')
+  const decoded = jwt.verify(token, JWT_SECRET)
 
   return decoded as { userId: string }
 }
@@ -48,15 +46,16 @@ export const loginWithGoogle = async (params: { token: string }) => {
   }
 
   // Generate JWT token
-  const jwtToken = jwt.sign(
-    { 
-      userId: user.id,
-      email: user.email
-    },
-    process.env.JWT_SECRET || 'secret',
-  )
+  return createJwtForUser({ user })
+}
 
-  return jwtToken
+const createJwtForUser = (params: { user: user }) => {
+  const { user } = params
+
+  return jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+  )
 }
 
 export const createUserWithGoogle = async (params: { token: string }) => {
@@ -81,50 +80,97 @@ export const createUserWithGoogle = async (params: { token: string }) => {
     },
   })
 
-  const jwtToken = jwt.sign(
-    { userId: user.id, email: user.email },
-    process.env.JWT_SECRET || 'secret',
-  )
-
-  return jwtToken
+  return createJwtForUser({ user })
 }
 
-// app.post('/link-user', async (request, reply) => {
-//   const { phone, token, verificationCode } = request.body as {
-//     phone: string,
-//     token: string,
-//     verificationCode: string,
-//   }
+export const getAuthenticatedUserId = (params: {
+  token: string
+}) => {
+  const { token } = params
+  const { userId } = verifyJwtToken(token)
 
-//   const user = await prisma.user.findUnique({
-//     where: { phone }
-//   })
+  return userId
+}
 
-//   if (user?.verification_code !== verificationCode) {
-//     return reply.status(400).send({ error: 'Invalid verification code' })
-//   }
+export const getAuthenticatedUser = (params: {
+  token: string
+}) => {
+  const { token } = params
+  const userId = getAuthenticatedUserId({ token })
 
-//   if (!user) {
-//     return reply.status(404).send({ error: 'User not found' })
-//   }
+  return prisma.user.findUnique({
+    where: { id: userId } })
+}
 
-//   // Verify Google token
-//   const {
-//     email,
-//   } = await verifyGoogleToken({ token, clientId: process.env.GOOGLE_CLIENT_ID || '' })
+// Generate a sequence of 6 alphanumeric characters
+const generateVerificationCode = () => {
+  return Math.random().toString(36).substring(2, 8)
+}
 
-//   if (user.email !== email) {
-//     return reply.status(400).send({ error: 'Account has already been linked to another email' })
-//   }
+const messageTemplate = (params: {
+  verificationCode: string,
+  email: string,
+}) => {
+  const { verificationCode, email } = params
 
-//   const linkedUser = await prisma.user.update({
-//     where: { phone },
-//     data: {
-//       email,
-//     }
-//   })
+  return [
+    `Your log-in link for Lexome is https://lexome.com/login?verification_code=${verificationCode}&email=${email}.`,
+    `Alternatively, you can enter the code ${verificationCode} into the Lexome app.`
+  ].join(' ')
+}
 
-//   reply.status(200).send({
-//     user: linkedUser,
-//   })
-// })
+const sendVerificationCode = async (params: {
+  email: string
+  verificationCode: string
+}) => {
+  const { email, verificationCode } = params
+
+  await sendEmail({
+    to: email,
+    subject: 'Lexome Log-In Link',
+    message: messageTemplate({
+      verificationCode,
+      email,
+    }),
+  })
+}
+
+export const beginEmailLogIn = async (params: {
+  email: string
+}) => {
+  const { email } = params
+
+  let user = await prisma.user.findFirst({ where: { email } })
+
+  if (!user) {
+    user = await prisma.user.create({ data: { email, first_name: '', last_name: '', display_name: '' } })
+  }
+
+  const verificationCode = generateVerificationCode()
+
+  await prisma.user.update({ where: { id: user.id }, data: { verification_code: verificationCode } })
+
+  sendVerificationCode({ email, verificationCode })
+
+  return { success: true }
+}
+
+export const completeEmailLogIn = async (params: {
+  email: string
+  verificationCode: string
+}): Promise<string | boolean> => {
+  const { email, verificationCode } = params
+
+  const user = await prisma.user.findFirst({ where: { email } })
+
+  if (!user) {
+    return false
+  }
+
+  if (user.verification_code === verificationCode) {
+    await prisma.user.update({ where: { id: user.id }, data: { verification_code: null } })
+    return createJwtForUser({ user })
+  }
+
+  return false
+}

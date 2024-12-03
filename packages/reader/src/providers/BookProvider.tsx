@@ -182,9 +182,9 @@ export const BookProvider: React.FC<BookProviderProps> = ({children}) => {
     rendition.themes.register("main",
       {
         "p": {
-          "margin-top": "8px",
-          "font-size": "20px",
-          "line-height": "1.5",
+          "margin-top": "9px",
+          "font-size": "18px",
+          "line-height": "1.4",
           "margin-bottom": "16px",
           "color": '#555555',
           "font-family": 'Inter, sans-serif',

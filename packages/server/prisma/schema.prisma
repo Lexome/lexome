@@ -24,7 +24,7 @@ model user {
   enhancement_patches  enhancement_patch[]
   subscriptions        subscription[]
   publishers           publisher_user[]
-  collections          book_collection[]
+  collections          user_collection[]
 }
 
 model author {
@@ -90,7 +90,7 @@ model book {
   publishers    publisher[]
   enhancements  enhancement[]
   genres        genre[]
-  collections   book_collection[]
+  collections   user_collection[]
   hash_index    String?
 }
 
@@ -162,7 +162,7 @@ model enhancement_patch {
   type                EnhancementType
 }
 
-model book_collection {
+model user_collection {
   id                  String        @id @default(uuid())
   created_at          DateTime      @default(now()) @db.Timestamptz(6)
   user_id             String

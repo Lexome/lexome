@@ -1,26 +1,16 @@
 import { Col, Row } from '@style-kit-n/web'
 import { ButtonSliderMenu } from '@/components/design-system/ButtonSliderMenu'
-import { useEnhancementPanelState } from '@/hooks/useEnhancementPanelState'
+import { BASIC_PANEL_MODE, basicPanelModes, enhancementTypeMenuSpec, useEnhancementPanelState } from '@/hooks/useEnhancementPanelState'
 import { EnhancementType } from '@lexome/core'
-import { useGenerateDefaultDiscussionEnhancement, useSubscribedEnhancements } from '@/hooks/data/useSubscribedEnhancements'
-import { use, useMemo } from 'react'
-import { useBookMetadata } from '@/hooks/data/useBookMetadata'
-
-
-type EnhancementTypeMenuSpec = {
-  value: EnhancementType,
-  label: string,
-}[]
-
-const enhancementTypeMenuSpec: EnhancementTypeMenuSpec = [
-  { value: EnhancementType.Summary, label: 'Summary' },
-]
+import { useSubscribedEnhancements } from '@/hooks/data/useSubscribedEnhancements'
+import { useMemo } from 'react'
+import { TableOfContents } from './table-of-contents'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { Button } from '../design-system/Button'
 
 const PanelMenu = () => {
   const { data: subscribedEnhancements } = useSubscribedEnhancements()
   // useGenerateDefaultDiscussionEnhancement()
-
-  const { data: bookMetadata } = useBookMetadata()
 
   const subscribedEnhancementTypeMenu = useMemo(() => {
     const types: EnhancementType[] = []
@@ -29,7 +19,18 @@ const PanelMenu = () => {
       types.push(...enhancement.includedTypes)
     }
 
-    return enhancementTypeMenuSpec.filter((type) => types.includes(type.value))
+    return enhancementTypeMenuSpec
+      .filter((type) => {
+        if (types.includes(type.value as EnhancementType)) {
+          return true
+        }
+
+        if (basicPanelModes.includes(type.value as BASIC_PANEL_MODE)) {
+          return true
+        }
+
+        return false
+      })
   }, [subscribedEnhancements])
 
   const {
@@ -44,28 +45,50 @@ const PanelMenu = () => {
   }
 
   return (
-    <Row
-      style={{
-        width: '100%',
-        alignItems: 'flex-start',
-      }}
-    >
-      <ButtonSliderMenu
-        value={selectedEnhancementType}
-        options={subscribedEnhancementTypeMenu}
-        onChange={(value) => {
-          handleChange(value)
+    <Row style={{ width: '100%', justifyContent: 'space-between' }}>
+      <Row
+        style={{
+          width: '100%',
+          alignItems: 'flex-start',
         }}
-      />
+      >
+        <ButtonSliderMenu
+          value={selectedEnhancementType}
+          options={subscribedEnhancementTypeMenu}
+          onChange={(value) => {
+            handleChange(value)
+          }}
+        />
+      </Row>
+      <Row>
+        <Button
+          leftIcon={SettingsIcon}
+          onClick={() => {
+            setSelectedEnhancementType(BASIC_PANEL_MODE.SETTINGS)
+          }}
+          label="Settings"
+        />
+      </Row>
     </Row>
   )
 }
 
 
+const PanelContentSwitch = () => {
+  const { selectedEnhancementType } = useEnhancementPanelState()
+
+  if (selectedEnhancementType === BASIC_PANEL_MODE.CONTENTS) {
+    return <TableOfContents />
+  }
+
+  return null
+}
+
 export const PanelContents = () => {
   return (
     <Col px={3} py={4}>
       <PanelMenu />
+      <PanelContentSwitch />
     </Col>
   )
 }

@@ -18,9 +18,8 @@ export type Scalars = {
 
 export type AuthResponse = {
   __typename?: 'AuthResponse';
-  jwtToken: Scalars['String']['output'];
+  jwt: Scalars['String']['output'];
   success: Scalars['Boolean']['output'];
-  userId: Scalars['String']['output'];
 };
 
 export type Author = {
@@ -52,14 +51,6 @@ export type Book = {
   title: Scalars['String']['output'];
 };
 
-export type BookCollection = {
-  __typename?: 'BookCollection';
-  books: Array<Book>;
-  createdAt: Scalars['String']['output'];
-  id: Scalars['String']['output'];
-  user: User;
-};
-
 export type BookConnection = {
   __typename?: 'BookConnection';
   pageInfo: PageInfo;
@@ -69,6 +60,11 @@ export type BookConnection = {
 export type BookFilters = {
   authors?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type EmailLogInResponse = {
+  __typename?: 'EmailLogInResponse';
+  success: Scalars['Boolean']['output'];
 };
 
 export type Enhancement = {
@@ -110,19 +106,34 @@ export type Genre = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addBookToCollection?: Maybe<Book>;
+  addBookToUserCollection?: Maybe<UserCollection>;
+  beginEmailLogIn?: Maybe<EmailLogInResponse>;
+  completeEmailLogIn?: Maybe<AuthResponse>;
   createAuthor?: Maybe<Author>;
   createBook?: Maybe<Book>;
   createEnhancement?: Maybe<Enhancement>;
   createSubscription?: Maybe<Subscription>;
+  createUserCollection?: Maybe<UserCollection>;
   createUserWithGoogle?: Maybe<AuthResponse>;
   deleteBook?: Maybe<Book>;
   logInWithGoogle?: Maybe<AuthResponse>;
+  removeBookFromUserCollection?: Maybe<UserCollection>;
 };
 
 
-export type MutationAddBookToCollectionArgs = {
+export type MutationAddBookToUserCollectionArgs = {
   bookId: Scalars['String']['input'];
+};
+
+
+export type MutationBeginEmailLogInArgs = {
+  email: Scalars['String']['input'];
+};
+
+
+export type MutationCompleteEmailLogInArgs = {
+  email: Scalars['String']['input'];
+  verificationCode: Scalars['String']['input'];
 };
 
 
@@ -171,6 +182,11 @@ export type MutationLogInWithGoogleArgs = {
   googleAccessToken: Scalars['String']['input'];
 };
 
+
+export type MutationRemoveBookFromUserCollectionArgs = {
+  bookId: Scalars['String']['input'];
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   hasMore: Scalars['Boolean']['output'];
@@ -184,14 +200,16 @@ export type Pagination = {
 
 export type Query = {
   __typename?: 'Query';
+  getAuthenticatedUser: User;
   getAuthor?: Maybe<Author>;
   getAuthors?: Maybe<AuthorConnection>;
   getBook?: Maybe<Book>;
-  getBookCollectionForUser?: Maybe<BookCollection>;
   getBooks?: Maybe<BookConnection>;
+  getBooksInCollection: Array<Book>;
   getEnhancementsForBook: Array<Enhancement>;
   getSubscribedEnhancementsForBook: Array<Enhancement>;
   getSubscriptions: Array<Enhancement>;
+  getUserCollection?: Maybe<UserCollection>;
 };
 
 
@@ -249,6 +267,7 @@ export type Subscription = {
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
   enhancementPatches: Array<EnhancementPatch>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
@@ -259,6 +278,18 @@ export type User = {
   subscriptions: Array<Subscription>;
   verificationCode?: Maybe<Scalars['String']['output']>;
 };
+
+export type UserCollection = {
+  __typename?: 'UserCollection';
+  books: Array<Book>;
+  id: Scalars['String']['output'];
+  user: User;
+};
+
+export type GetAuthenticatedUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAuthenticatedUserQuery = { __typename?: 'Query', getAuthenticatedUser: { __typename?: 'User', id: string, email?: string | null } };
 
 export type GetBookAssetQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -284,12 +315,27 @@ export type CreateEnhancementMutationVariables = Exact<{
 
 export type CreateEnhancementMutation = { __typename?: 'Mutation', createEnhancement?: { __typename?: 'Enhancement', id: string, title: string, includedTypes: Array<EnhancementType>, isDefault?: boolean | null } | null };
 
+export type BeginEmailLoginMutationMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type BeginEmailLoginMutationMutation = { __typename?: 'Mutation', beginEmailLogIn?: { __typename?: 'EmailLogInResponse', success: boolean } | null };
+
+export type CompleteEmailLoginMutationMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+  verificationCode: Scalars['String']['input'];
+}>;
+
+
+export type CompleteEmailLoginMutationMutation = { __typename?: 'Mutation', completeEmailLogIn?: { __typename?: 'AuthResponse', success: boolean, jwt: string } | null };
+
 export type LogInWithGoogleMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
 
-export type LogInWithGoogleMutation = { __typename?: 'Mutation', logInWithGoogle?: { __typename?: 'AuthResponse', jwtToken: string } | null };
+export type LogInWithGoogleMutation = { __typename?: 'Mutation', logInWithGoogle?: { __typename?: 'AuthResponse', jwt: string } | null };
 
 export type ListStoryBooksQueryVariables = Exact<{
   query?: InputMaybe<Scalars['String']['input']>;
@@ -306,10 +352,19 @@ export type GetEnhancementsQueryVariables = Exact<{
 
 export type GetEnhancementsQuery = { __typename?: 'Query', getSubscribedEnhancementsForBook: Array<{ __typename?: 'Enhancement', coalescedData: string, includedTypes: Array<EnhancementType>, id: string, isDefault?: boolean | null }> };
 
+export type GetUserCollectionQueryVariables = Exact<{ [key: string]: never; }>;
 
+
+export type GetUserCollectionQuery = { __typename?: 'Query', getUserCollection?: { __typename?: 'UserCollection', id: string, books: Array<{ __typename?: 'Book', id: string, title: string, coverUrl?: string | null, description?: string | null, authors?: Array<{ __typename?: 'Author', id: string, displayName?: string | null } | null> | null }> } | null };
+
+
+export const GetAuthenticatedUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAuthenticatedUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAuthenticatedUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<GetAuthenticatedUserQuery, GetAuthenticatedUserQueryVariables>;
 export const GetBookAssetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBookAsset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getBook"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"assetUrl"}}]}}]}}]} as unknown as DocumentNode<GetBookAssetQuery, GetBookAssetQueryVariables>;
 export const GetBookMetadataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBookMetadata"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getBook"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hashIndex"}}]}}]}}]} as unknown as DocumentNode<GetBookMetadataQuery, GetBookMetadataQueryVariables>;
 export const CreateEnhancementDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateEnhancement"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"title"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bookId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"includedTypes"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"EnhancementType"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"isDefault"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createEnhancement"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"title"},"value":{"kind":"Variable","name":{"kind":"Name","value":"title"}}},{"kind":"Argument","name":{"kind":"Name","value":"bookId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bookId"}}},{"kind":"Argument","name":{"kind":"Name","value":"isDefault"},"value":{"kind":"Variable","name":{"kind":"Name","value":"isDefault"}}},{"kind":"Argument","name":{"kind":"Name","value":"includedTypes"},"value":{"kind":"Variable","name":{"kind":"Name","value":"includedTypes"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"includedTypes"}},{"kind":"Field","name":{"kind":"Name","value":"isDefault"}}]}}]}}]} as unknown as DocumentNode<CreateEnhancementMutation, CreateEnhancementMutationVariables>;
-export const LogInWithGoogleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LogInWithGoogle"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"token"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logInWithGoogle"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"googleAccessToken"},"value":{"kind":"Variable","name":{"kind":"Name","value":"token"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jwtToken"}}]}}]}}]} as unknown as DocumentNode<LogInWithGoogleMutation, LogInWithGoogleMutationVariables>;
+export const BeginEmailLoginMutationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"BeginEmailLoginMutation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"beginEmailLogIn"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<BeginEmailLoginMutationMutation, BeginEmailLoginMutationMutationVariables>;
+export const CompleteEmailLoginMutationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CompleteEmailLoginMutation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"verificationCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completeEmailLogIn"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"Argument","name":{"kind":"Name","value":"verificationCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"verificationCode"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"jwt"}}]}}]}}]} as unknown as DocumentNode<CompleteEmailLoginMutationMutation, CompleteEmailLoginMutationMutationVariables>;
+export const LogInWithGoogleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LogInWithGoogle"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"token"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logInWithGoogle"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"googleAccessToken"},"value":{"kind":"Variable","name":{"kind":"Name","value":"token"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jwt"}}]}}]}}]} as unknown as DocumentNode<LogInWithGoogleMutation, LogInWithGoogleMutationVariables>;
 export const ListStoryBooksDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListStoryBooks"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"query"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getBooks"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"query"},"value":{"kind":"Variable","name":{"kind":"Name","value":"query"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasMore"}},{"kind":"Field","name":{"kind":"Name","value":"offset"}}]}},{"kind":"Field","name":{"kind":"Name","value":"records"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"coverUrl"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"authors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"displayName"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ListStoryBooksQuery, ListStoryBooksQueryVariables>;
 export const GetEnhancementsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEnhancements"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"bookId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getSubscribedEnhancementsForBook"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"bookId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"bookId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"coalescedData"}},{"kind":"Field","name":{"kind":"Name","value":"includedTypes"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"isDefault"}}]}}]}}]} as unknown as DocumentNode<GetEnhancementsQuery, GetEnhancementsQueryVariables>;
+export const GetUserCollectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserCollection"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserCollection"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"books"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"coverUrl"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"authors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"displayName"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetUserCollectionQuery, GetUserCollectionQueryVariables>;

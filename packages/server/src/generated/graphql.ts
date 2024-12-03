@@ -18,9 +18,8 @@ export type Scalars = {
 
 export type AuthResponse = {
   __typename?: 'AuthResponse';
-  jwtToken: Scalars['String']['output'];
+  jwt: Scalars['String']['output'];
   success: Scalars['Boolean']['output'];
-  userId: Scalars['String']['output'];
 };
 
 export type Author = {
@@ -52,14 +51,6 @@ export type Book = {
   title: Scalars['String']['output'];
 };
 
-export type BookCollection = {
-  __typename?: 'BookCollection';
-  books: Array<Book>;
-  createdAt: Scalars['String']['output'];
-  id: Scalars['String']['output'];
-  user: User;
-};
-
 export type BookConnection = {
   __typename?: 'BookConnection';
   pageInfo: PageInfo;
@@ -69,6 +60,11 @@ export type BookConnection = {
 export type BookFilters = {
   authors?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type EmailLogInResponse = {
+  __typename?: 'EmailLogInResponse';
+  success: Scalars['Boolean']['output'];
 };
 
 export type Enhancement = {
@@ -110,19 +106,34 @@ export type Genre = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addBookToCollection?: Maybe<Book>;
+  addBookToUserCollection?: Maybe<UserCollection>;
+  beginEmailLogIn?: Maybe<EmailLogInResponse>;
+  completeEmailLogIn?: Maybe<AuthResponse>;
   createAuthor?: Maybe<Author>;
   createBook?: Maybe<Book>;
   createEnhancement?: Maybe<Enhancement>;
   createSubscription?: Maybe<Subscription>;
+  createUserCollection?: Maybe<UserCollection>;
   createUserWithGoogle?: Maybe<AuthResponse>;
   deleteBook?: Maybe<Book>;
   logInWithGoogle?: Maybe<AuthResponse>;
+  removeBookFromUserCollection?: Maybe<UserCollection>;
 };
 
 
-export type MutationAddBookToCollectionArgs = {
+export type MutationAddBookToUserCollectionArgs = {
   bookId: Scalars['String']['input'];
+};
+
+
+export type MutationBeginEmailLogInArgs = {
+  email: Scalars['String']['input'];
+};
+
+
+export type MutationCompleteEmailLogInArgs = {
+  email: Scalars['String']['input'];
+  verificationCode: Scalars['String']['input'];
 };
 
 
@@ -171,6 +182,11 @@ export type MutationLogInWithGoogleArgs = {
   googleAccessToken: Scalars['String']['input'];
 };
 
+
+export type MutationRemoveBookFromUserCollectionArgs = {
+  bookId: Scalars['String']['input'];
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   hasMore: Scalars['Boolean']['output'];
@@ -184,14 +200,16 @@ export type Pagination = {
 
 export type Query = {
   __typename?: 'Query';
+  getAuthenticatedUser: User;
   getAuthor?: Maybe<Author>;
   getAuthors?: Maybe<AuthorConnection>;
   getBook?: Maybe<Book>;
-  getBookCollectionForUser?: Maybe<BookCollection>;
   getBooks?: Maybe<BookConnection>;
+  getBooksInCollection: Array<Book>;
   getEnhancementsForBook: Array<Enhancement>;
   getSubscribedEnhancementsForBook: Array<Enhancement>;
   getSubscriptions: Array<Enhancement>;
+  getUserCollection?: Maybe<UserCollection>;
 };
 
 
@@ -249,6 +267,7 @@ export type Subscription = {
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
   enhancementPatches: Array<EnhancementPatch>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
@@ -258,6 +277,13 @@ export type User = {
   profilePicture?: Maybe<Scalars['String']['output']>;
   subscriptions: Array<Subscription>;
   verificationCode?: Maybe<Scalars['String']['output']>;
+};
+
+export type UserCollection = {
+  __typename?: 'UserCollection';
+  books: Array<Book>;
+  id: Scalars['String']['output'];
+  user: User;
 };
 
 
@@ -335,10 +361,10 @@ export type ResolversTypes = {
   Author: ResolverTypeWrapper<Author>;
   AuthorConnection: ResolverTypeWrapper<AuthorConnection>;
   Book: ResolverTypeWrapper<Book>;
-  BookCollection: ResolverTypeWrapper<BookCollection>;
   BookConnection: ResolverTypeWrapper<BookConnection>;
   BookFilters: BookFilters;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  EmailLogInResponse: ResolverTypeWrapper<EmailLogInResponse>;
   Enhancement: ResolverTypeWrapper<Enhancement>;
   EnhancementPatch: ResolverTypeWrapper<EnhancementPatch>;
   EnhancementType: EnhancementType;
@@ -352,6 +378,7 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subscription: ResolverTypeWrapper<{}>;
   User: ResolverTypeWrapper<User>;
+  UserCollection: ResolverTypeWrapper<UserCollection>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -360,10 +387,10 @@ export type ResolversParentTypes = {
   Author: Author;
   AuthorConnection: AuthorConnection;
   Book: Book;
-  BookCollection: BookCollection;
   BookConnection: BookConnection;
   BookFilters: BookFilters;
   Boolean: Scalars['Boolean']['output'];
+  EmailLogInResponse: EmailLogInResponse;
   Enhancement: Enhancement;
   EnhancementPatch: EnhancementPatch;
   Genre: Genre;
@@ -375,12 +402,12 @@ export type ResolversParentTypes = {
   String: Scalars['String']['output'];
   Subscription: {};
   User: User;
+  UserCollection: UserCollection;
 };
 
 export type AuthResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthResponse'] = ResolversParentTypes['AuthResponse']> = {
-  jwtToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  jwt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -413,17 +440,14 @@ export type BookResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type BookCollectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BookCollection'] = ResolversParentTypes['BookCollection']> = {
-  books?: Resolver<Array<ResolversTypes['Book']>, ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type BookConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BookConnection'] = ResolversParentTypes['BookConnection']> = {
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
   records?: Resolver<Array<ResolversTypes['Book']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type EmailLogInResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['EmailLogInResponse'] = ResolversParentTypes['EmailLogInResponse']> = {
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -459,14 +483,18 @@ export type GenreResolvers<ContextType = any, ParentType extends ResolversParent
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  addBookToCollection?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationAddBookToCollectionArgs, 'bookId'>>;
+  addBookToUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType, RequireFields<MutationAddBookToUserCollectionArgs, 'bookId'>>;
+  beginEmailLogIn?: Resolver<Maybe<ResolversTypes['EmailLogInResponse']>, ParentType, ContextType, RequireFields<MutationBeginEmailLogInArgs, 'email'>>;
+  completeEmailLogIn?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationCompleteEmailLogInArgs, 'email' | 'verificationCode'>>;
   createAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<MutationCreateAuthorArgs, 'displayName'>>;
   createBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationCreateBookArgs, 'title'>>;
   createEnhancement?: Resolver<Maybe<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<MutationCreateEnhancementArgs, 'bookId' | 'includedTypes' | 'title'>>;
   createSubscription?: Resolver<Maybe<ResolversTypes['Subscription']>, ParentType, ContextType, RequireFields<MutationCreateSubscriptionArgs, 'enhancementId'>>;
+  createUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType>;
   createUserWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationCreateUserWithGoogleArgs, 'googleAccessToken'>>;
   deleteBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationDeleteBookArgs, 'id'>>;
   logInWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationLogInWithGoogleArgs, 'googleAccessToken'>>;
+  removeBookFromUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType, RequireFields<MutationRemoveBookFromUserCollectionArgs, 'bookId'>>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
@@ -476,14 +504,16 @@ export type PageInfoResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  getAuthenticatedUser?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   getAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<QueryGetAuthorArgs, 'id'>>;
   getAuthors?: Resolver<Maybe<ResolversTypes['AuthorConnection']>, ParentType, ContextType, Partial<QueryGetAuthorsArgs>>;
   getBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<QueryGetBookArgs, 'id'>>;
-  getBookCollectionForUser?: Resolver<Maybe<ResolversTypes['BookCollection']>, ParentType, ContextType>;
   getBooks?: Resolver<Maybe<ResolversTypes['BookConnection']>, ParentType, ContextType, Partial<QueryGetBooksArgs>>;
+  getBooksInCollection?: Resolver<Array<ResolversTypes['Book']>, ParentType, ContextType>;
   getEnhancementsForBook?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<QueryGetEnhancementsForBookArgs, 'bookId'>>;
   getSubscribedEnhancementsForBook?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType, RequireFields<QueryGetSubscribedEnhancementsForBookArgs, 'bookId'>>;
   getSubscriptions?: Resolver<Array<ResolversTypes['Enhancement']>, ParentType, ContextType, Partial<QueryGetSubscriptionsArgs>>;
+  getUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType>;
 };
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
@@ -496,6 +526,7 @@ export type SubscriptionResolvers<ContextType = any, ParentType extends Resolver
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   enhancementPatches?: Resolver<Array<ResolversTypes['EnhancementPatch']>, ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -508,13 +539,20 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type UserCollectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserCollection'] = ResolversParentTypes['UserCollection']> = {
+  books?: Resolver<Array<ResolversTypes['Book']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   AuthResponse?: AuthResponseResolvers<ContextType>;
   Author?: AuthorResolvers<ContextType>;
   AuthorConnection?: AuthorConnectionResolvers<ContextType>;
   Book?: BookResolvers<ContextType>;
-  BookCollection?: BookCollectionResolvers<ContextType>;
   BookConnection?: BookConnectionResolvers<ContextType>;
+  EmailLogInResponse?: EmailLogInResponseResolvers<ContextType>;
   Enhancement?: EnhancementResolvers<ContextType>;
   EnhancementPatch?: EnhancementPatchResolvers<ContextType>;
   Genre?: GenreResolvers<ContextType>;
@@ -523,5 +561,6 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
+  UserCollection?: UserCollectionResolvers<ContextType>;
 };
 

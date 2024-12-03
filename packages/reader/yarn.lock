@@ -1123,20 +1123,15 @@
     "@babel/helper-validator-identifier" "^7.24.7"
     to-fast-properties "^2.0.0"
 
+"@dprint/darwin-arm64@0.45.1":
+  version "0.45.1"
+  resolved "https://registry.npmjs.org/@dprint/darwin-arm64/-/darwin-arm64-0.45.1.tgz"
+  integrity sha512-pH0/uKLJ5SJPoHhOwLWFMhCmL0BY3FzWQbull8OGMK/FRkIPgOl2adZSovtUZpUMGWyDOzIWH1fW9X2DuMhnEg==
+
 "@dprint/formatter@^0.3.0":
   version "0.3.0"
   resolved "https://registry.npmjs.org/@dprint/formatter/-/formatter-0.3.0.tgz"
   integrity sha512-N9fxCxbaBOrDkteSOzaCqwWjso5iAe+WJPsHC021JfHNj2ThInPNEF13ORDKta3llq5D1TlclODCvOvipH7bWQ==
-
-"@dprint/linux-x64-glibc@0.45.1":
-  version "0.45.1"
-  resolved "https://registry.npmjs.org/@dprint/linux-x64-glibc/-/linux-x64-glibc-0.45.1.tgz"
-  integrity sha512-5Civht90S/g8zlyYB7n4oH78p+sLbNqeFCFuImJRK7uRxZwCRya7lji6RwlB6DQ7qngVqovTHj9RLOYfZzfVlg==
-
-"@dprint/linux-x64-musl@0.45.1":
-  version "0.45.1"
-  resolved "https://registry.npmjs.org/@dprint/linux-x64-musl/-/linux-x64-musl-0.45.1.tgz"
-  integrity sha512-p2/gjnHDd8GRCvtey5HZO4o/He6pSmY/zpcCuIXprFW9P0vNlEj3DFhz4FPpOKXM+csrsVWWs2E0T/xr5QZtVg==
 
 "@dprint/typescript@^0.90.4":
   version "0.90.5"
@@ -1950,15 +1945,10 @@
   dependencies:
     glob "7.1.7"
 
-"@next/swc-linux-x64-gnu@14.0.4":
+"@next/swc-darwin-arm64@14.0.4":
   version "14.0.4"
-  resolved "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-14.0.4.tgz"
-  integrity sha512-/s/Pme3VKfZAfISlYVq2hzFS8AcAIOTnoKupc/j4WlvF6GQ0VouS2Q2KEgPuO1eMBwakWPB1aYFIA4VNVh667A==
-
-"@next/swc-linux-x64-musl@14.0.4":
-  version "14.0.4"
-  resolved "https://registry.npmjs.org/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-14.0.4.tgz"
-  integrity sha512-m8z/6Fyal4L9Bnlxde5g2Mfa1Z7dasMQyhEhskDATpqr+Y0mjOBZcXQ7G5U+vgL22cI4T7MfvgtrM2jdopqWaw==
+  resolved "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-14.0.4.tgz"
+  integrity sha512-mF05E/5uPthWzyYDyptcwHptucf/jj09i2SXBPwNzbgBNc+XnwzrL0U6BmPjQeOL+FiB+iG1gwBeq7mlDjSRPg==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -2557,17 +2547,17 @@
     "@smithy/types" "^3.7.1"
     tslib "^2.6.2"
 
-"@style-kit-n/core@0.13.0":
-  version "0.13.0"
-  resolved "https://registry.npmjs.org/@style-kit-n/core/-/core-0.13.0.tgz"
-  integrity sha512-4sEBbNue3NMC8hiIp3imRKNLv05+2p1pp58AIsnZNJGR8h5xeS6vGx2Pq1zjtXA6VnG5j+pJVT/qI9mzYuV2eg==
+"@style-kit-n/core@0.14.0":
+  version "0.14.0"
+  resolved "https://registry.npmjs.org/@style-kit-n/core/-/core-0.14.0.tgz"
+  integrity sha512-SDXAeSQ8EEhSDljrpjh17yRlzOen0ZB3Ft8NUb+DtRG/nxuWgsGEy+MGG1qBr6jUPfsxGCoZreQi1HN9yy2E6Q==
 
-"@style-kit-n/web@0.25.0":
-  version "0.25.0"
-  resolved "https://registry.npmjs.org/@style-kit-n/web/-/web-0.25.0.tgz"
-  integrity sha512-0ZF0M5OLzfT12aVL8LPQxG+vIC/gtU1nHhZMeYKW/JYGWciwxTg+Scl94A7csGhILvoEJ3zpVnO+2605iPpNBg==
+"@style-kit-n/web@0.27.0":
+  version "0.27.0"
+  resolved "https://registry.npmjs.org/@style-kit-n/web/-/web-0.27.0.tgz"
+  integrity sha512-XyFpp7u68uvHy72zQjSoWiQhEDuQhXrryWQoJxS1rsGX0UkuqWGflAMdKQkDzft4X+l2OCALEz398KaGQzPbTQ==
   dependencies:
-    "@style-kit-n/core" "0.13.0"
+    "@style-kit-n/core" "0.14.0"
 
 "@stylexjs/babel-plugin@^0.4.1":
   version "0.4.1"
@@ -4429,6 +4419,11 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
+
+fsevents@~2.3.2:
+  version "2.3.3"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
+  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.2:
   version "1.1.2"

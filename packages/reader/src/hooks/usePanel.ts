@@ -1,3 +1,4 @@
+import { STATE_KEY } from "@/constants"
 import { useSharedState } from "./useSharedState"
 
 export enum RIGHT_PANEL_STATE {
@@ -73,14 +74,14 @@ export const getRightPanelWidth = (params: {
 
 export const useRightPanel = () => {
   return useSharedState<RIGHT_PANEL_STATE>({
-    key: 'right-panel',
+    key: STATE_KEY.RIGHT_PANEL,
     initialValue: RIGHT_PANEL_STATE.CLOSED
   })
 }
 
 export const useLeftPanel = () => {
   return useSharedState<LEFT_PANEL_STATE>({
-    key: 'left-panel',
+    key: STATE_KEY.LEFT_PANEL,
     initialValue: LEFT_PANEL_STATE.CLOSED
   })
 }

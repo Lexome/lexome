@@ -1,5 +1,6 @@
 import { COLOR } from "@/theme/colors"
 import { FONT_FAMILY, FONT_SIZE } from "@/theme/font"
+import { STATE_KEY } from "@/constants"
 import { useSharedState } from "./useSharedState"
 
 const FONT_SIZES = ['12px', '16px', '20px', '24px', '28px']
@@ -48,18 +49,21 @@ export const colorSchemes: ColorScheme[] = [{
 
 export const useStylePreferences = () => {
   const [savedColorScheme, setSavedColorScheme] = useSharedState<COLOR_SCHEME_NAME>({
-    key: 'saved-color-scheme',
-    initialValue: COLOR_SCHEME_NAME.LIGHT_STANDARD
+    key: STATE_KEY.SAVED_COLOR_SCHEME,
+    initialValue: COLOR_SCHEME_NAME.LIGHT_STANDARD,
+    shouldSaveToStorage: true
   })
 
   const [savedFontSize, setSavedFontSize] = useSharedState<string>({
-    key: 'saved-font-size',
-    initialValue: FONT_SIZE.MD
+    key: STATE_KEY.SAVED_FONT_SIZE,
+    initialValue: FONT_SIZE.MD,
+    shouldSaveToStorage: true
   })
 
   const [savedFontFamily, setSavedFontFamily] = useSharedState<string>({
-    key: 'saved-font-family',
-    initialValue: FONT_FAMILY.SANS_SERIF
+    key: STATE_KEY.SAVED_FONT_FAMILY,
+    initialValue: FONT_FAMILY.SANS_SERIF,
+    shouldSaveToStorage: true
   })
 
   return {

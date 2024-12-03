@@ -6,3 +6,5 @@ export const Column = styled('div', {
     display: 'flex'
   }
 })
+
+export type ColumnProps = React.ComponentProps<typeof Column>

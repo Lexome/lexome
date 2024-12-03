@@ -1,13 +1,21 @@
 import { styled } from '@/theme';
-import { Button } from '@/components/design-system/Button'
+import { Button, BUTTON_TYPE } from '@/components/design-system/Button'
 import GoogleIcon from '@mui/icons-material/Google'
-import { useState } from 'react';
-import { LoadingSpinner } from './design-system/LoadingSpinner';
+import React, { useState } from 'react';
+import { CenterLoadingSpinner, LOADING_SPINNER_SIZE } from './design-system/LoadingSpinner';
 import { useListenForGoogleAuthToken } from '@/hooks/useSetGoogleAuthToken';
 import { useLogInWithGoogle } from '@/hooks/data/useLogInWithGoogle';
-import { useStoredValue } from '@/hooks/useStorage';
 import { useSharedState } from '@/hooks/useSharedState';
-import { STATE_KEYS } from '@/stateKeys';
+import { useJwt, useWatchForJwtInStorage } from '@/hooks/useAuth';
+import { STATE_KEY } from '@/constants';
+import { INPUT_SIZE, isValidEmail, MASK_TYPE, TextInput } from './design-system/fields/TextInput';
+import { Column } from './design-system/Column';
+import { Text } from './design-system/Text';
+import { COLOR } from '@/theme/colors';
+import { FONT_WEIGHT, TYPOGRAPHY_TYPE } from '@/theme/font';
+import { Row } from '@style-kit-n/web';
+import { useCompleteEmailLogin, useLogInWithEmail } from '@/hooks/data/useLogInWithEmail';
+import { useToastStack } from './design-system/ToastStack';
 
 const ModalOverlay = styled('div', {
   styles: {
@@ -25,15 +33,18 @@ const ModalOverlay = styled('div', {
 });
 
 const ModalContent = styled('div', {
+  w: '100%',
+  px: 5,
+  py: 4,
   styles: {
+    maxWidth: '300px',
     background: 'white',
-    padding: '20px',
     borderRadius: '8px',
-    width: '500px',
-    height: '600px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 });
-
 
 const GOOGLE_CLIENT_ID = '941682513344-qji0ep52vn1o82l6sv59n0ffc09kpqt8.apps.googleusercontent.com'
 const GOOGLE_REDIRECT_URI = 'http://localhost:3000/login'
@@ -56,29 +67,53 @@ function oauthSignIn() {
   window.open(url, '_blank')?.focus()
 }
 
+export const Divider = styled('div', {
+  bg: COLOR.LIGHT_GRAY,
+  styles: {
+    height: '1px',
+    width: '100%',
+  }
+})
+
+export const OrDivider = () => {
+  return (
+    <Row my={3} style={{ alignItems: 'center' }}>
+      <Divider />
+      <Text
+        type={TYPOGRAPHY_TYPE.PARAGRAPH_SMALL}
+        color={COLOR.GRAY}
+        mx={2}
+      >
+        OR
+      </Text>
+      <Divider />
+    </Row>
+  )
+}
+
 export const LogInButton = ({ onLoginSuccess }: { onLoginSuccess: (token: string) => void }) => {
   const [waitingForAuth, setWaitingForAuth] = useState(false)
   const logInWithGoogle = useLogInWithGoogle()
-  const [_, setJwtToken] = useStoredValue(STATE_KEYS.JWT_TOKEN, '')
+  const [_, setJwt] = useJwt()
+
   const listenForGoogleAuthToken = useListenForGoogleAuthToken()
 
   const handleClick = async () => {
     setWaitingForAuth(true)
     oauthSignIn()
-    const token = await listenForGoogleAuthToken()
+    const googleToken = await listenForGoogleAuthToken()
 
-    logInWithGoogle.mutate(token, {
+    logInWithGoogle.mutate(googleToken, {
       onSuccess: (data) => {
-        const token = data.logInWithGoogle!.jwtToken
-        console.log('loggin in with token', token)
-        setJwtToken(token)
-        onLoginSuccess(token)
+        const jwt = data.logInWithGoogle!.jwt
+        setJwt(jwt)
+        onLoginSuccess(jwt)
       }
     })
   }
 
   if (waitingForAuth) {
-    return <LoadingSpinner />
+    return <CenterLoadingSpinner size={LOADING_SPINNER_SIZE.MD} />
   }
 
   return (
@@ -90,11 +125,74 @@ export const LogInButton = ({ onLoginSuccess }: { onLoginSuccess: (token: string
   );
 };
 
+const ModalButtonGroupContainer = styled('div', {
+  styles: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'flex-end',
+    marginTop: '16px'
+  }
+})
+
+export const ModalButtonGroup = ({ children }: { children: React.ReactNode }) => {
+  const childrenWithMargin = React.Children.map(children, (child, index) => {
+    return React.cloneElement(child as React.ReactElement, {
+      style: {
+        marginLeft: '4px'
+      }
+    })
+  })
+
+  return (
+    <ModalButtonGroupContainer>
+      {childrenWithMargin}
+    </ModalButtonGroupContainer>
+  )
+}
+
+export const VerificationScreen = () => {
+  const [code, setCode] = useState('')
+  const { addToast } = useToastStack()
+
+  const handleCancel = () => {
+    // closeModal()
+  }
+
+  const handleVerify = () => {
+    addToast('Verification successful')
+  }
+
+  return (
+    <Column>
+      <Row>
+        <Text>You have been sent an email with a magic link that will log you in.</Text>
+      </Row>
+      <Row>
+        <Text>Alternatively, you can enter the code you received here.</Text>
+      </Row>
+      <TextInput
+        value={code}
+        onChange={value => setCode(value)}
+        maskType={MASK_TYPE.CODE}
+        placeholder="999999"
+        size={INPUT_SIZE.MD}
+      />
+
+      <ModalButtonGroup>
+        <Button label="Cancel" onClick={handleCancel} type={BUTTON_TYPE.OUTLINE} />
+        <Button label="Verify" onClick={handleVerify} type={BUTTON_TYPE.FILLED} />
+      </ModalButtonGroup>
+    </Column>
+  )
+}
+
 export const useLogInModalState = () => {
   const [isLoginModalOpen, setModalState] = useSharedState({
-    key: 'login-modal-state',
+    key: STATE_KEY.LOGIN_MODAL_STATE,
     initialValue: false
   })
+
   return {
     isLoginModalOpen,
     openModal: () => setModalState(true),
@@ -104,8 +202,27 @@ export const useLogInModalState = () => {
 
 export const LogInModal = () => {
   const { isLoginModalOpen, closeModal } = useLogInModalState()
+  const [email, setEmail] = useState('')
+  const [isVerificationScreenOpen, setIsVerificationScreenOpen] = useState(false)
+  const logInWithEmail = useLogInWithEmail()
+  const completeEmailLogin = useCompleteEmailLogin()
+
+  const watchForJwtInStorage = useWatchForJwtInStorage({
+    onReceiveJwt: (jwt) => {
+      closeModal()
+    }
+  })
 
   if (!isLoginModalOpen) return null;
+
+  const handleCancel = () => {
+    closeModal()
+  }
+
+  const handleSubmit = () => {
+    setIsVerificationScreenOpen(true)
+    watchForJwtInStorage(true)
+  }
 
   const handleOverlayClick = () => {
     closeModal();
@@ -122,7 +239,42 @@ export const LogInModal = () => {
   return (
     <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent onClick={handleModalClick}>
-        <LogInButton onLoginSuccess={onLoginSuccess} />
+        {isVerificationScreenOpen && (
+          <VerificationScreen />
+        )}
+
+        {!isVerificationScreenOpen && (
+          <Column style={{ width: '100%' }}>
+            <Row style={{ justifyContent: 'center' }}>
+              <Text typography={TYPOGRAPHY_TYPE.HEADLINE_LARGE} fontWeight={FONT_WEIGHT.NORMAL}>Log in</Text>
+            </Row>
+            <Row mt={3}>
+              <LogInButton onLoginSuccess={onLoginSuccess} />
+            </Row>
+            <OrDivider />
+            <Column style={{ width: '100%' }}>
+              <TextInput
+                label="Sign In With Email"
+                placeholder="Enter Email"
+                value={email}
+                onChange={value => {
+                  setEmail(value)
+                }}
+                maskType={MASK_TYPE.EMAIL}
+                size={INPUT_SIZE.MD}
+              />
+              <ModalButtonGroup>
+                <Button label="Cancel" onClick={handleCancel} type={BUTTON_TYPE.OUTLINE} />
+                <Button
+                  label="Submit"
+                  onClick={handleSubmit}
+                  type={BUTTON_TYPE.FILLED}
+                  disabled={!isValidEmail(email)}
+                />
+              </ModalButtonGroup>
+            </Column>
+          </Column>
+        )}
       </ModalContent>
     </ModalOverlay>
   )

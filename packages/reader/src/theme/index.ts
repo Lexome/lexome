@@ -29,7 +29,7 @@ export const theme: LexomeTheme = {
   typography
 }
 
-interface LexomeStyleProps extends WebStyleProps {
+export interface LexomeStyleProps extends WebStyleProps {
   color?: COLOR,
   fontSize?: FONT_SIZE,
   fontWeight?: FONT_WEIGHT,

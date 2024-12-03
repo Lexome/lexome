@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { graphql } from "../../../gql"
 import request from "graphql-request"
 import { GRAPHQL_ENDPOINT } from "@/config"
+import { ListStoryBooksQuery } from "../../../gql/graphql"
 
 const STORE_BOOK_LIST = 'store_book_list'
 
@@ -25,6 +26,8 @@ query ListStoryBooks($query: String, $pagination: Pagination) {
   }
 }
 `)
+
+export type CollectionBook = NonNullable<NonNullable<ListStoryBooksQuery['getBooks']>['records']>[0]
 
 export const useStoreBookList = (params: {
   query?: string,

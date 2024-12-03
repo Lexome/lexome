@@ -1,4 +1,5 @@
 export enum FONT_SIZE {
+  XS='xs',
   SM='sm',
   MS='ms',
   MD='md',
@@ -9,6 +10,7 @@ export enum FONT_SIZE {
 }
 
 export const fontSizes = {
+  [FONT_SIZE.XS]: '12px',
   [FONT_SIZE.SM]: '14px',
   [FONT_SIZE.MS]: '16px',
   [FONT_SIZE.MD]: '20px',
@@ -40,10 +42,9 @@ export enum FONT_FAMILY {
 
 export const fontFamilies = {
   [FONT_FAMILY.SANS_SERIF]: "Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
-  [FONT_FAMILY.HEADLINE]: "Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif",
+  [FONT_FAMILY.HEADLINE]: "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
   [FONT_FAMILY.OLD_SERIF]: "'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif",
   [FONT_FAMILY.FRIENDLY_SERIF]: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif"
-
 }
 
 export enum LINE_HEIGHT {
@@ -110,19 +111,19 @@ export const typography = {
     fontFamily: FONT_FAMILY.SANS_SERIF,
   },
   [TYPOGRAPHY_TYPE.HEADLINE_SMALL]: {
-    fontSize: FONT_SIZE.MD,
+    fontSize: FONT_SIZE.MS,
     lineHeight: LINE_HEIGHT.NORMAL,
     fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.HEADLINE,
   },
   [TYPOGRAPHY_TYPE.HEADLINE_MEDIUM]: {
-    fontSize: FONT_SIZE.ML,
+    fontSize: FONT_SIZE.MD,
     lineHeight: LINE_HEIGHT.NORMAL,
     fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.HEADLINE,
   },
   [TYPOGRAPHY_TYPE.HEADLINE_LARGE]: {
-    fontSize: FONT_SIZE.LG,
+    fontSize: FONT_SIZE.ML,
     lineHeight: LINE_HEIGHT.NORMAL,
     fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.HEADLINE,

@@ -16,7 +16,7 @@ type Query {
   ): BookConnection
   getBook(id: String!): Book
 
-  getBookCollectionForUser: BookCollection
+  getUserCollection: UserCollection
 
   getAuthors(
     query: String,
@@ -27,6 +27,10 @@ type Query {
   getEnhancementsForBook(bookId: String!): [Enhancement!]!
   getSubscriptions(bookId: String): [Enhancement!]!
   getSubscribedEnhancementsForBook(bookId: String!): [Enhancement!]!
+
+  getAuthenticatedUser: User!
+
+  getBooksInCollection: [Book!]!
 
   #getGenres: [Genre!]!
   #getGenre(id: String!): Genre
@@ -67,7 +71,9 @@ type Mutation {
 
   createSubscription(enhancementId: String!, role: Role): Subscription
 
-  addBookToCollection(bookId: String!): Book
+  createUserCollection: UserCollection
+  addBookToUserCollection(bookId: String!): UserCollection
+  removeBookFromUserCollection(bookId: String!): UserCollection
 
   createEnhancement(
     title: String!,
@@ -125,11 +131,17 @@ type Mutation {
   # Auth
   logInWithGoogle(googleAccessToken: String!): AuthResponse
   createUserWithGoogle(googleAccessToken: String!): AuthResponse
+
+  beginEmailLogIn(email: String!): EmailLogInResponse
+  completeEmailLogIn(email: String!, verificationCode: String!): AuthResponse
 }
 
 type AuthResponse {
-  userId: String!
-  jwtToken: String!
+  jwt: String!
+  success: Boolean!
+}
+
+type EmailLogInResponse {
   success: Boolean!
 }
 
@@ -141,6 +153,7 @@ type User {
   lastName: String
   isAdmin: Boolean!
   phone: String
+  email: String
   verificationCode: String
   enhancementPatches: [EnhancementPatch!]!
   subscriptions: [Subscription!]!
@@ -177,9 +190,8 @@ type Book {
   hashIndex: String
 }
 
-type BookCollection {
+type UserCollection {
   id: String!
-  createdAt: String!
   books: [Book!]!
   user: User!
 }

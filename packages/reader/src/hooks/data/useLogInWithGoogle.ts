@@ -6,7 +6,7 @@ import request from "graphql-request"
 const logInWithGoogleMutation = graphql(`
   mutation LogInWithGoogle($token: String!) {
     logInWithGoogle(googleAccessToken: $token) {
-      jwtToken
+      jwt
     }
   }
 `)

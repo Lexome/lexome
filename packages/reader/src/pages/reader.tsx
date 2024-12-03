@@ -71,7 +71,7 @@ const Panel = styled(
     bg: COLOR.OFF_WHITE,
     styles: {
       height: '100vh',
-     boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.1)',
+      boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.1)',
       display: 'flex',
       flexDirection: 'row',
     }
