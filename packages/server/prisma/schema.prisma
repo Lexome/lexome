@@ -84,6 +84,7 @@ model book {
   title         String
   description   String?
   cover_url     String?
+  thumbnail_url String?
   asset_url     String?       @unique
   authors       author[]
   author_names_cached  String?

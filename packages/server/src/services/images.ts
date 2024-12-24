@@ -1,5 +1,6 @@
-const sharp = require('sharp');
-const { Storage } = require('@google-cloud/storage');
+import sharp from 'sharp'
+import { Storage } from '@google-cloud/storage'
+import { prisma } from '../prisma'
 
 const downloadImageFile = async (imageUrl: string): Promise<File> => {
   const image = await fetch(imageUrl)
@@ -13,6 +14,39 @@ export const createImageThumbnail = async (image: File) => {
     .resize({ width: 200 })       // Resize to 200px wide (height automatically scaled)
     .toFormat('jpeg')             // Convert or ensure output is in JPEG format
     .toBuffer()
+}
+
+export const addThumbnailForBookCover = async (bookId) => {
+  const book = await prisma.book.findUnique({
+    where: {
+      id: bookId
+    },
+    select: {
+      cover_url: true
+    }
+  })
+
+  const coverUrl = book?.cover_url
+
+  if (coverUrl) {
+    const imageFile = await downloadImageFile(coverUrl)
+    const thumbnailBuffer = await createImageThumbnail(imageFile)
+    const thumbnailFile = await uploadImageToBucket({
+      imageBuffer: thumbnailBuffer,
+      bucketName: 'thumbnails',
+      fileName: `${bookId}.jpg`
+    })
+
+    await prisma.book.update({
+      where: {
+        id: bookId
+      },
+      data: {
+        thumbnail_url: thumbnailFile.publicUrl()
+      }
+    })
+  }
+
 }
 
 const uploadImageToBucket = async (params:{

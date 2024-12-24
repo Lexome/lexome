@@ -10,5 +10,6 @@ export enum STATE_KEY {
   SAVED_COLOR_SCHEME = 'saved-color-scheme',
   SAVED_FONT_SIZE = 'saved-font-size',
   SAVED_FONT_FAMILY = 'saved-font-family',
-  LOG_IN_REDIRECT_PATH = 'log-in-redirect-path'
+  LOG_IN_REDIRECT_PATH = 'log-in-redirect-path',
+  PERSONALIZATION = 'personalization',
 }

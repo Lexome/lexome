@@ -11,6 +11,11 @@ interface LexomeTheme extends WebTheme {
   typography: typeof typography,
 }
 
+export enum THEME_MODE {
+  LIGHT = 'light',
+  DARK = 'dark'
+}
+
 export const theme: LexomeTheme = {
   colors,
   space: [
@@ -28,6 +33,20 @@ export const theme: LexomeTheme = {
   lineHeights,
   typography
 }
+
+const getDarkTheme = () => {
+  const newTheme: LexomeTheme = {...theme}
+  const newColors = {...theme.colors}
+
+  newColors[COLOR.BACKGROUND_STRONG] = colors[COLOR.FOREGROUND_STRONG]
+  newColors[COLOR.BACKGROUND_MEDIUM] = colors[COLOR.FOREGROUND_MEDIUM]
+  newColors[COLOR.BACKGROUND_SOFT] = colors[COLOR.FOREGROUND_SOFT]
+  newColors[COLOR.FOREGROUND_STRONG] = colors[COLOR.BACKGROUND_STRONG]
+  newColors[COLOR.FOREGROUND_MEDIUM] = colors[COLOR.BACKGROUND_MEDIUM]
+  newColors[COLOR.FOREGROUND_SOFT] = colors[COLOR.BACKGROUND_SOFT]
+
+  return newTheme
+)
 
 export interface LexomeStyleProps extends WebStyleProps {
   color?: COLOR,

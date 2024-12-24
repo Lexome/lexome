@@ -22,7 +22,7 @@ export const CardContainer = styled<CardContainerProps>(
   }: CardContainerProps) => ({
     bg: COLOR.BACKGROUND_STRONG,
     border: '1px solid',
-    borderColor: COLOR.PRIMARY_FAINT,
+    borderColor: COLOR.FOREGROUND_SOFT,
     styles: {
       display: 'flex',
       flexDirection: layout === CARD_LAYOUT.VERTICAL ? 'column' : 'row',
