@@ -159,6 +159,16 @@ type User {
   subscriptions: [Subscription!]!
 }
 
+enum ThemeMode {
+  light
+  dark
+  system
+}
+
+type ReaderPreferences {
+  themeMode: ThemeMode
+}
+
 type Author {
   id: String!
   createdAt: String

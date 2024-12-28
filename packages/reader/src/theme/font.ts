@@ -35,16 +35,15 @@ export const fontWeights = {
 export enum FONT_FAMILY {
   SANS_SERIF = 'sansSerif',
   HEADLINE = 'headline',
-  OLD_SERIF = 'oldSerif',
-  FRIENDLY_SERIF = 'friendlySerif',
-  
+  CLASSIC_SERIF = 'classicSerif',
+  SOFT_SERIF = 'softSerif',
 }
 
 export const fontFamilies = {
   [FONT_FAMILY.SANS_SERIF]: "Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
   [FONT_FAMILY.HEADLINE]: "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
-  [FONT_FAMILY.OLD_SERIF]: "'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif",
-  [FONT_FAMILY.FRIENDLY_SERIF]: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif"
+  [FONT_FAMILY.CLASSIC_SERIF]: "'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif",
+  [FONT_FAMILY.SOFT_SERIF]: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif"
 }
 
 export enum LINE_HEIGHT {
@@ -70,7 +69,9 @@ export enum TYPOGRAPHY_TYPE {
 
   HEADLINE_SMALL='headline_small',
   HEADLINE_MEDIUM='headline_medium',
-  HEADLINE_LARGE='headline_large'
+  HEADLINE_LARGE='headline_large',
+
+  READER_PARAGRAPH='reader_paragraph'
 }
 
 export const typography = {
@@ -128,4 +129,10 @@ export const typography = {
     fontWeight: FONT_WEIGHT.NORMAL,
     fontFamily: FONT_FAMILY.HEADLINE,
   },
+  [TYPOGRAPHY_TYPE.READER_PARAGRAPH]: {
+    fontSize: FONT_SIZE.MD,
+    lineHeight: LINE_HEIGHT.NORMAL,
+    fontWeight: FONT_WEIGHT.NORMAL,
+    fontFamily: FONT_FAMILY.SANS_SERIF
+  }
 }

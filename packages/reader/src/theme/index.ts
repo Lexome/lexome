@@ -34,8 +34,8 @@ export const theme: LexomeTheme = {
   typography
 }
 
-const getDarkTheme = () => {
-  const newTheme: LexomeTheme = {...theme}
+const getDarkTheme = (baseTheme: LexomeTheme) => {
+  const newTheme: LexomeTheme = {...baseTheme}
   const newColors = {...theme.colors}
 
   newColors[COLOR.BACKGROUND_STRONG] = colors[COLOR.FOREGROUND_STRONG]
@@ -46,7 +46,15 @@ const getDarkTheme = () => {
   newColors[COLOR.FOREGROUND_SOFT] = colors[COLOR.BACKGROUND_SOFT]
 
   return newTheme
-)
+}
+
+const getCustomizedFontTheme = (params: {
+  baseTheme: LexomeTheme,
+  theme:
+}) => {
+  const theme = { ...baseTheme }
+
+}
 
 export interface LexomeStyleProps extends WebStyleProps {
   color?: COLOR,
