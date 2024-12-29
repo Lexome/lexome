@@ -91,9 +91,9 @@ export type EnhancementPatch = {
 };
 
 export enum EnhancementType {
-  Narration = 'narration',
-  Notes = 'notes',
-  Summary = 'summary'
+  Narration = 'NARRATION',
+  Notes = 'NOTES',
+  Summary = 'SUMMARY'
 }
 
 export type Genre = {
@@ -118,6 +118,7 @@ export type Mutation = {
   deleteBook?: Maybe<Book>;
   logInWithGoogle?: Maybe<AuthResponse>;
   removeBookFromUserCollection?: Maybe<UserCollection>;
+  updatePersonalization?: Maybe<Personalization>;
 };
 
 
@@ -187,6 +188,13 @@ export type MutationRemoveBookFromUserCollectionArgs = {
   bookId: Scalars['String']['input'];
 };
 
+
+export type MutationUpdatePersonalizationArgs = {
+  readerFontSize?: InputMaybe<Scalars['Int']['input']>;
+  readerFontStyle?: InputMaybe<ReaderFontPreference>;
+  themeMode?: InputMaybe<ThemeMode>;
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   hasMore: Scalars['Boolean']['output'];
@@ -196,6 +204,13 @@ export type PageInfo = {
 export type Pagination = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type Personalization = {
+  __typename?: 'Personalization';
+  fontStyle?: Maybe<ReaderFontPreference>;
+  readerFontSize?: Maybe<Scalars['Int']['output']>;
+  themeMode?: Maybe<ThemeMode>;
 };
 
 export type Query = {
@@ -250,9 +265,15 @@ export type QueryGetSubscriptionsArgs = {
   bookId?: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum ReaderFontPreference {
+  ClassicSerif = 'CLASSIC_SERIF',
+  Modern = 'MODERN',
+  SoftSerif = 'SOFT_SERIF'
+}
+
 export enum Role {
-  Admin = 'admin',
-  User = 'user'
+  Admin = 'ADMIN',
+  User = 'USER'
 }
 
 export type Subscription = {
@@ -264,6 +285,12 @@ export type Subscription = {
   user: User;
 };
 
+export enum ThemeMode {
+  Dark = 'DARK',
+  Light = 'LIGHT',
+  System = 'SYSTEM'
+}
+
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['String']['output'];
@@ -273,6 +300,7 @@ export type User = {
   id: Scalars['String']['output'];
   isAdmin: Scalars['Boolean']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
+  personalization?: Maybe<Personalization>;
   phone?: Maybe<Scalars['String']['output']>;
   profilePicture?: Maybe<Scalars['String']['output']>;
   subscriptions: Array<Subscription>;
@@ -373,10 +401,13 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   Pagination: Pagination;
+  Personalization: ResolverTypeWrapper<Personalization>;
   Query: ResolverTypeWrapper<{}>;
+  ReaderFontPreference: ReaderFontPreference;
   Role: Role;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subscription: ResolverTypeWrapper<{}>;
+  ThemeMode: ThemeMode;
   User: ResolverTypeWrapper<User>;
   UserCollection: ResolverTypeWrapper<UserCollection>;
 };
@@ -398,6 +429,7 @@ export type ResolversParentTypes = {
   Mutation: {};
   PageInfo: PageInfo;
   Pagination: Pagination;
+  Personalization: Personalization;
   Query: {};
   String: Scalars['String']['output'];
   Subscription: {};
@@ -495,11 +527,19 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationDeleteBookArgs, 'id'>>;
   logInWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationLogInWithGoogleArgs, 'googleAccessToken'>>;
   removeBookFromUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType, RequireFields<MutationRemoveBookFromUserCollectionArgs, 'bookId'>>;
+  updatePersonalization?: Resolver<Maybe<ResolversTypes['Personalization']>, ParentType, ContextType, Partial<MutationUpdatePersonalizationArgs>>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
   hasMore?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   offset?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PersonalizationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Personalization'] = ResolversParentTypes['Personalization']> = {
+  fontStyle?: Resolver<Maybe<ResolversTypes['ReaderFontPreference']>, ParentType, ContextType>;
+  readerFontSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  themeMode?: Resolver<Maybe<ResolversTypes['ThemeMode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -532,6 +572,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   isAdmin?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  personalization?: Resolver<Maybe<ResolversTypes['Personalization']>, ParentType, ContextType>;
   phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   profilePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   subscriptions?: Resolver<Array<ResolversTypes['Subscription']>, ParentType, ContextType>;
@@ -558,6 +599,7 @@ export type Resolvers<ContextType = any> = {
   Genre?: GenreResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
+  Personalization?: PersonalizationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   User?: UserResolvers<ContextType>;

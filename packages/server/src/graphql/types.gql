@@ -75,12 +75,19 @@ type Mutation {
   addBookToUserCollection(bookId: String!): UserCollection
   removeBookFromUserCollection(bookId: String!): UserCollection
 
+  updatePersonalization(
+    themeMode: ThemeMode,
+    readerFontSize: Int,
+    readerFontStyle: ReaderFontPreference
+  ): Personalization
+
   createEnhancement(
     title: String!,
     bookId: String!,
     includedTypes: [EnhancementType!]!,
     isDefault: Boolean,
   ): Enhancement
+
 
   #createGenre(
   #  name: String!,
@@ -157,16 +164,25 @@ type User {
   verificationCode: String
   enhancementPatches: [EnhancementPatch!]!
   subscriptions: [Subscription!]!
+  personalization: Personalization
 }
 
 enum ThemeMode {
-  light
-  dark
-  system
+  LIGHT
+  DARK
+  SYSTEM
 }
 
-type ReaderPreferences {
-  themeMode: ThemeMode
+enum ReaderFontPreference {
+  MODERN
+  SOFT_SERIF
+  CLASSIC_SERIF
+}
+
+type Personalization {
+  themeMode: ThemeMode,
+  readerFontSize: Int,
+  fontStyle: ReaderFontPreference
 }
 
 type Author {
@@ -240,8 +256,8 @@ type Subscription {
 }
 
 enum Role {
-  admin
-  user
+  ADMIN
+  USER
 }
 
 type EnhancementPatch {
@@ -253,7 +269,7 @@ type EnhancementPatch {
 }
 
 enum EnhancementType {
-  summary
-  notes
-  narration
+  SUMMARY
+  NOTES
+  NARRATION
 }

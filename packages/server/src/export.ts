@@ -1,5 +1,7 @@
 export {
-  EnhancementType
+  EnhancementType,
+  ReaderFontPreference,
+  ThemeMode,
 } from "./generated/graphql"
 
 export { buildEnhancementPatch } from "./services/enhancements/core/buildEnhancementPatch"

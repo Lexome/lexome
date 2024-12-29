@@ -25,6 +25,7 @@ model user {
   subscriptions        subscription[]
   publishers           publisher_user[]
   collections          user_collection[]
+  personalization      Json?
 }
 
 model author {
@@ -38,8 +39,8 @@ model author {
 }
 
 enum PublisherType {
-  self_published
-  traditional
+  TRADITIONAL
+  SELF_PUBLISHED
 }
 
 model publisher_author {
@@ -53,8 +54,8 @@ model publisher_author {
 }
 
 enum PublisherRole {
-  admin
-  user
+  ADMIN
+  USER
 }
 
 model publisher_user {
@@ -104,12 +105,13 @@ model genre {
 
 enum EnhancementType {
   summary
-  notes
-  narration
+  SUMMARY
+  NOTES
+  NARRATION
 }
 
 enum EmailSubscriptionType {
-  major_updates
+  MAJOR_UPDATES
 }
 
 model email_subscription {
@@ -147,8 +149,8 @@ model subscription {
 }
 
 enum Role {
-  admin
-  user
+  ADMIN
+  USER
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
