@@ -1,5 +1,5 @@
 import path from "path";
-import fs from "fs";
+import fs, { existsSync } from "fs";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const isObject = (value: any) => {
@@ -123,4 +123,25 @@ export const uploadFileToS3 = async (params: {
   }))
 
   return `https://${params.bucket}.s3.amazonaws.com/${params.key}`
+}
+
+export const findPackageRoot = () => {
+  // Check if dirname has package.json
+  // If not, go up until a package.json is found
+  let currentDir = __dirname
+
+  while (true) {
+    const packagePath = path.join(currentDir, 'package.json')
+    const packageExists = existsSync(packagePath)
+
+    if (packageExists) {
+      return currentDir
+    }
+    
+    if (currentDir === '/') {
+      return null
+    }
+
+    currentDir = path.join(currentDir, '..')
+  }
 }
