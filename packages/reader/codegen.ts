@@ -11,7 +11,8 @@ const config: CodegenConfig = {
       }
     }
   },
-  noSilentErrors: true
+  noSilentErrors: true,
+  verbose: true
 }
 
 export default config

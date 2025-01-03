@@ -23,7 +23,7 @@ const getButtonColor = (params: {
 }) => {
   const { buttonType, disabled } = params
 
-  if (disabled) return COLOR.GRAY
+  if (disabled) return COLOR.FOREGROUND_MEDIUM
 
   if (buttonType === BUTTON_TYPE.FILLED) return COLOR.PRIMARY
 
@@ -35,8 +35,8 @@ const getButtonTextColor = (params: {
   disabled: boolean
 }) => {
   const { buttonType, disabled } = params
-  if (disabled) return COLOR.GRAY
-  if (buttonType === BUTTON_TYPE.FILLED) return COLOR.WHITE
+  if (disabled) return COLOR.FOREGROUND_MEDIUM
+  if (buttonType === BUTTON_TYPE.FILLED) return COLOR.BACKGROUND_STRONG
   return COLOR.PRIMARY
 }
 

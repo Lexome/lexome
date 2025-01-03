@@ -99,7 +99,8 @@ export const getAuthenticatedUser = (params: {
   const userId = getAuthenticatedUserId({ token })
 
   return prisma.user.findUnique({
-    where: { id: userId } })
+    where: { id: userId }
+  })
 }
 
 // Generate a sequence of 6 alphanumeric characters

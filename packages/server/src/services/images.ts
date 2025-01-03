@@ -10,7 +10,8 @@ const downloadImageFile = async (imageUrl: string): Promise<File> => {
 }
 
 export const createImageThumbnail = async (image: File) => {
-  return await sharp(image)
+  const buffer = await image.arrayBuffer()
+  return await sharp(buffer)
     .resize({ width: 200 })       // Resize to 200px wide (height automatically scaled)
     .toFormat('jpeg')             // Convert or ensure output is in JPEG format
     .toBuffer()

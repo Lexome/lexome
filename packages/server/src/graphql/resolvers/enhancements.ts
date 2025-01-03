@@ -1,10 +1,12 @@
-import { enhancement } from "@prisma/client";
+import { enhancement, Role } from "@prisma/client";
 
 import { convertObjectPropertiesToCamelCase } from "../../utils";
 import { createEnhancement } from "../../services/enhancements/core/createEnhancement";
 import { prisma } from "../../prisma";
 import { coalesceEnhancementDataById } from "../../services/enhancements/core/coalesceEnhancementData";
 import { Resolvers } from "../../generated/graphql";
+import { createPersonalEnhancement } from "../../services/enhancements/operations/createPersonalEnhancement";
+import { shareEnhancement } from "../../services/enhancements/operations/shareEnhancement";
 
 export const resolvers: Resolvers = {
   Enhancement: {
@@ -33,10 +35,17 @@ export const resolvers: Resolvers = {
       const bookId = args.bookId;
       const user = context.user;
 
-      let enhancements: enhancement[] = []
+      const defaultEnhancements = await prisma.enhancement.findMany({
+        where: {
+          is_default: true,
+          book_id: bookId
+        }
+      });
+
+      let enhancements: enhancement[] = [...defaultEnhancements];
 
       if (user) {
-        enhancements = await prisma.enhancement.findMany({
+        let personalEnhancements = await prisma.enhancement.findMany({
           where: {
             subscriptions: {
               some: {
@@ -46,15 +55,17 @@ export const resolvers: Resolvers = {
             book_id: bookId
           }
         })
-      }
 
-      if (enhancements.length === 0) {
-        enhancements = await prisma.enhancement.findMany({
-          where: {
-            is_default: true,
-            book_id: bookId
-          }
-        })
+        if (personalEnhancements.length === 0) {
+          personalEnhancements = [
+            await createPersonalEnhancement({
+              bookId,
+              userId: user.id
+            })
+          ]
+        }
+
+        enhancements = [...enhancements, ...personalEnhancements]
       }
 
       return enhancements.map(convertObjectPropertiesToCamelCase);
@@ -82,7 +93,7 @@ export const resolvers: Resolvers = {
   Mutation: {
     createSubscription: async (_, args, context) => {
       const { enhancementId } = args;
-      const role = args.role || 'user'
+      const role = args.role || Role.USER
       const user = context.user;
 
       if (!user) {
@@ -124,6 +135,20 @@ export const resolvers: Resolvers = {
       })
 
       return convertObjectPropertiesToCamelCase(enhancement);
+    },
+
+    shareEnhancement: async (_, args, context) => {
+      const { enhancementId } = args
+      const user = context.user
+
+      await shareEnhancement({
+        userId: user.id,
+        enhancementId
+      })
+
+      return {
+        success: true
+      }
     },
 
     // addEnhancementPatch: async (

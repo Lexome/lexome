@@ -135,6 +135,7 @@ model enhancement {
   patches                   enhancement_patch[] @relation("enhancement_patches")
   subscriptions             subscription[]
   grant_admin_to_publisher  Boolean?            @default(true)
+  is_personal               Boolean?            @default(false)
   is_default                Boolean?            @default(false)
 }
 

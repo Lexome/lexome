@@ -5,6 +5,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { findPackageRoot } from "../utils";
 import playwright from 'playwright';
+import { Storage } from '@google-cloud/storage';
 
 export const downloadBook = async (url: string) => {
   const browser =  await playwright.chromium.launch({ headless: true })
@@ -147,14 +148,23 @@ const formatAuthorDisplayName = (author: string) => {
   return formattedAuthorParts.join(' ')
 }
 
-const main = async () => {
-  const jsonBooksList = fs.readFileSync(path.join(outputDir, 'ebook-links.json'), 'utf8')
-  const booksFromJson = JSON.parse(jsonBooksList)
+const saveEbookLinks = async () => {
+  const ebookLinks = await getEbookLinks();
+  const writePath = path.join(outputDir, 'ebook-links.json')
+  fs.writeFileSync(writePath, JSON.stringify(ebookLinks, null, 2))
+}
 
-  const authorSlugs = new Set()
-  const titleSlugs = new Set()
+const loadEbookLinks = async () => {
+  const readPath = path.join(outputDir, 'ebook-links.json')
+  const ebookLinks = fs.readFileSync(readPath, 'utf8')
+  return JSON.parse(ebookLinks)
+}
 
-  for (const book of booksFromJson) {
+const createSlugSets = (ebookLinks: string[]) => {
+  const authorSlugs = new Set<string>()
+  const titleSlugs = new Set<string>()
+
+  for (const book of ebookLinks) {
     const bookParts = book.split('/')
     const author = bookParts[2]
     const title = bookParts[3]
@@ -163,62 +173,114 @@ const main = async () => {
     titleSlugs.add(title)
   }
 
-  // const ebookLinks = await getEbookLinks();
+  return { authorSlugs, titleSlugs }
+}
 
-  // console.log('links', ebookLinks)
+const getDownloadedBooks = async () => {
+  const storage = new Storage();
+  const bucketName = 'standard-ebooks';
+  const bucket = storage.bucket(bucketName);
 
-  // Write to file
-  // const writePath = path.join(outputDir, 'ebook-links.json')
-  // fs.writeFileSync(writePath, JSON.stringify(ebookLinks, null, 2))
+  const [files] = await bucket.getFiles({
+    prefix: 'books/'
+  });
+  return files.map(file => file.name);
+}
 
-  const booksDirectory = path.join(outputDir, 'books')
-  const books = fs.readdirSync(booksDirectory)
+const extractAuthorAndTitle = (params: {
+  bookString: string,
+  authorSet: Set<string>,
+}) => {
+  const { bookString, authorSet } = params
 
-  for (const book of books) {
-    const epubUrl = `https://storage.googleapis.com/standard-ebooks/books/${book}`
-    const coverUrl = `https://storage.googleapis.com/standard-ebooks/covers/${book}`.replace('.epub', '.jpg')
+  let cleanedBookString = bookString.replace('books/', '')
 
-    let bookParts = book.split('_')
-    let author = ''
-    let title = ''
+  let bookparts = cleanedBookString.split('_')
 
-    // Find longest concatation of book parts that is in author set
-    for (let i = bookParts.length; i > 0; i--) {
-      const testAuthorSlug = bookParts.slice(0, i).join('_')
+  let authorSlug = ''
+  let titleSlug = ''
 
-      if (authorSlugs.has(testAuthorSlug)) {
-        author = testAuthorSlug
-        title = bookParts[i]
-      }
+  // find longest concatation of book parts that is in author set
+  for (let i = bookparts.length; i > 0; i--) {
+    const testAuthorSlug = bookparts.slice(0, i).join('_')
+
+    if (authorSet.has(testAuthorSlug)) {
+      authorSlug = testAuthorSlug
+      titleSlug = bookparts[i]
     }
+  }
 
-    const authors = author.split('_').map(formatAuthorDisplayName)
-    const authorIds: string[] = []
+  return {
+    authorSlug,
+    titleSlug
+  }
+}
 
-    for (const author of authors) {
-      const authorRecord = await prisma.author.findFirst({
-        where: {
+const getAuthorIds = async (params: {
+  authorSlug: string
+}) => {
+  const { authorSlug } = params
+
+  const authors = authorSlug.split('_').map(formatAuthorDisplayName)
+
+  const authorIds: string[] = []
+
+  for (const author of authors) {
+    const authorRecord = await prisma.author.findFirst({
+      where: {
+        display_name: author
+      }
+    })
+
+    if (!authorRecord) {
+      const newAuthor = await prisma.author.create({
+        data: {
           display_name: author
         }
       })
 
-      if (!authorRecord) {
-        console.log('author not found', author)
-      } else {
-        authorIds.push(authorRecord.id)
-      }
+      authorIds.push(newAuthor.id)
+      
+    } else {
+      authorIds.push(authorRecord.id)
+    }
+  }
+
+  return authorIds
+}
+
+const main = async () => {
+  const ebookLinks = await loadEbookLinks();
+  const {
+    authorSlugs,
+  } = createSlugSets(ebookLinks)
+
+  const downloadedBooks = await getDownloadedBooks()
+
+  for (const book of downloadedBooks) {
+    const epubUrl = `https://storage.googleapis.com/standard-ebooks/books/${book}`
+    const coverUrl = `https://storage.googleapis.com/standard-ebooks/covers/${book}`.replace('.epub', '.jpg')
+
+    const { authorSlug, titleSlug } = extractAuthorAndTitle({
+      bookString: book,
+      authorSet: authorSlugs,
+    })
+
+    if (!authorSlug) {
+      console.log('no author slug found for', book)
+      continue
     }
 
-    const bookTitle = formatBookTitle(title.replace('.epub', ''))
-
+    const bookTitle = formatBookTitle(titleSlug.replace('.epub', ''))
     const bookRecord = await prisma.book.findFirst({
       where: {
         title: bookTitle
       }
     })
 
+    const authorIds = await getAuthorIds({ authorSlug })
+
     if (!bookRecord) {
-      console.log('creating book', bookTitle)
       await prisma.book.create({
         data: {
           title: bookTitle,
@@ -229,20 +291,20 @@ const main = async () => {
           }
         }
       })
-    } else {
-
-      console.log('updating book', bookTitle)
-      await prisma.book.update({
-        where: {
-          id: bookRecord.id
-        },
-        data: {
-          authors: {
-            connect: authorIds.map((id) => ({ id }))
-          }
-        }
-      })
     }
+  }
+}
+
+  //     await prisma.book.update({
+  //       where: {
+  //         id: bookRecord.id
+  //       },
+  //       data: {
+  //         authors: {
+  //           connect: authorIds.map((id) => ({ id }))
+  //         }
+  //       }
+  //     })
 
     // const author = bookParts[0]
     // const formattedAuthor = formatAuthorDisplayName(author)
@@ -310,7 +372,7 @@ const main = async () => {
       // const coverDestination = path.join(coversFolder, `${bookNoExtension}.jpg`)
       // fs.copyFileSync(coverPath, coverDestination)
     // }
-  }
+  // }
 
   // let skip = true
 
@@ -329,6 +391,5 @@ const main = async () => {
   //     await downloadBook('https://standardebooks.org' + book)
   //   }
   // }
-}
 
-main()
+export default main

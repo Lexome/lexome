@@ -8,6 +8,7 @@ const getAuthenticatedUserQuery = graphql(`
     getAuthenticatedUser {
       id
       email
+      personalization
     }
   }
 `)

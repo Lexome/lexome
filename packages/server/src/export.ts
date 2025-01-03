@@ -2,6 +2,7 @@ export {
   EnhancementType,
   ReaderFontPreference,
   ThemeMode,
+  Personalization,
 } from "./generated/graphql"
 
 export { buildEnhancementPatch } from "./services/enhancements/core/buildEnhancementPatch"

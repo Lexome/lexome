@@ -79,7 +79,7 @@ type Mutation {
     themeMode: ThemeMode,
     readerFontSize: Int,
     readerFontStyle: ReaderFontPreference
-  ): Personalization
+  ): GenericSuccessResponse
 
   createEnhancement(
     title: String!,
@@ -87,6 +87,11 @@ type Mutation {
     includedTypes: [EnhancementType!]!,
     isDefault: Boolean,
   ): Enhancement
+
+  shareEnhancement(
+    enhancementId: String!,
+    userId: String!,
+  ): GenericSuccessResponse
 
 
   #createGenre(
@@ -139,7 +144,7 @@ type Mutation {
   logInWithGoogle(googleAccessToken: String!): AuthResponse
   createUserWithGoogle(googleAccessToken: String!): AuthResponse
 
-  beginEmailLogIn(email: String!): EmailLogInResponse
+  beginEmailLogIn(email: String!): GenericSuccessResponse
   completeEmailLogIn(email: String!, verificationCode: String!): AuthResponse
 }
 
@@ -148,7 +153,7 @@ type AuthResponse {
   success: Boolean!
 }
 
-type EmailLogInResponse {
+type GenericSuccessResponse {
   success: Boolean!
 }
 
@@ -182,7 +187,7 @@ enum ReaderFontPreference {
 type Personalization {
   themeMode: ThemeMode,
   readerFontSize: Int,
-  fontStyle: ReaderFontPreference
+  readerFontStyle: ReaderFontPreference
 }
 
 type Author {

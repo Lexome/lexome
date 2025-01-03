@@ -62,11 +62,6 @@ export type BookFilters = {
   genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-export type EmailLogInResponse = {
-  __typename?: 'EmailLogInResponse';
-  success: Scalars['Boolean']['output'];
-};
-
 export type Enhancement = {
   __typename?: 'Enhancement';
   book: Book;
@@ -96,6 +91,11 @@ export enum EnhancementType {
   Summary = 'SUMMARY'
 }
 
+export type GenericSuccessResponse = {
+  __typename?: 'GenericSuccessResponse';
+  success: Scalars['Boolean']['output'];
+};
+
 export type Genre = {
   __typename?: 'Genre';
   books?: Maybe<Array<Maybe<Book>>>;
@@ -107,7 +107,7 @@ export type Genre = {
 export type Mutation = {
   __typename?: 'Mutation';
   addBookToUserCollection?: Maybe<UserCollection>;
-  beginEmailLogIn?: Maybe<EmailLogInResponse>;
+  beginEmailLogIn?: Maybe<GenericSuccessResponse>;
   completeEmailLogIn?: Maybe<AuthResponse>;
   createAuthor?: Maybe<Author>;
   createBook?: Maybe<Book>;
@@ -118,7 +118,8 @@ export type Mutation = {
   deleteBook?: Maybe<Book>;
   logInWithGoogle?: Maybe<AuthResponse>;
   removeBookFromUserCollection?: Maybe<UserCollection>;
-  updatePersonalization?: Maybe<Personalization>;
+  shareEnhancement?: Maybe<GenericSuccessResponse>;
+  updatePersonalization?: Maybe<GenericSuccessResponse>;
 };
 
 
@@ -189,6 +190,12 @@ export type MutationRemoveBookFromUserCollectionArgs = {
 };
 
 
+export type MutationShareEnhancementArgs = {
+  enhancementId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+
 export type MutationUpdatePersonalizationArgs = {
   readerFontSize?: InputMaybe<Scalars['Int']['input']>;
   readerFontStyle?: InputMaybe<ReaderFontPreference>;
@@ -208,8 +215,8 @@ export type Pagination = {
 
 export type Personalization = {
   __typename?: 'Personalization';
-  fontStyle?: Maybe<ReaderFontPreference>;
   readerFontSize?: Maybe<Scalars['Int']['output']>;
+  readerFontStyle?: Maybe<ReaderFontPreference>;
   themeMode?: Maybe<ThemeMode>;
 };
 
@@ -392,10 +399,10 @@ export type ResolversTypes = {
   BookConnection: ResolverTypeWrapper<BookConnection>;
   BookFilters: BookFilters;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  EmailLogInResponse: ResolverTypeWrapper<EmailLogInResponse>;
   Enhancement: ResolverTypeWrapper<Enhancement>;
   EnhancementPatch: ResolverTypeWrapper<EnhancementPatch>;
   EnhancementType: EnhancementType;
+  GenericSuccessResponse: ResolverTypeWrapper<GenericSuccessResponse>;
   Genre: ResolverTypeWrapper<Genre>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -421,9 +428,9 @@ export type ResolversParentTypes = {
   BookConnection: BookConnection;
   BookFilters: BookFilters;
   Boolean: Scalars['Boolean']['output'];
-  EmailLogInResponse: EmailLogInResponse;
   Enhancement: Enhancement;
   EnhancementPatch: EnhancementPatch;
+  GenericSuccessResponse: GenericSuccessResponse;
   Genre: Genre;
   Int: Scalars['Int']['output'];
   Mutation: {};
@@ -478,11 +485,6 @@ export type BookConnectionResolvers<ContextType = any, ParentType extends Resolv
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type EmailLogInResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['EmailLogInResponse'] = ResolversParentTypes['EmailLogInResponse']> = {
-  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type EnhancementResolvers<ContextType = any, ParentType extends ResolversParentTypes['Enhancement'] = ResolversParentTypes['Enhancement']> = {
   book?: Resolver<ResolversTypes['Book'], ParentType, ContextType>;
   coalescedData?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -506,6 +508,11 @@ export type EnhancementPatchResolvers<ContextType = any, ParentType extends Reso
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GenericSuccessResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['GenericSuccessResponse'] = ResolversParentTypes['GenericSuccessResponse']> = {
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GenreResolvers<ContextType = any, ParentType extends ResolversParentTypes['Genre'] = ResolversParentTypes['Genre']> = {
   books?: Resolver<Maybe<Array<Maybe<ResolversTypes['Book']>>>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -516,7 +523,7 @@ export type GenreResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addBookToUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType, RequireFields<MutationAddBookToUserCollectionArgs, 'bookId'>>;
-  beginEmailLogIn?: Resolver<Maybe<ResolversTypes['EmailLogInResponse']>, ParentType, ContextType, RequireFields<MutationBeginEmailLogInArgs, 'email'>>;
+  beginEmailLogIn?: Resolver<Maybe<ResolversTypes['GenericSuccessResponse']>, ParentType, ContextType, RequireFields<MutationBeginEmailLogInArgs, 'email'>>;
   completeEmailLogIn?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationCompleteEmailLogInArgs, 'email' | 'verificationCode'>>;
   createAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<MutationCreateAuthorArgs, 'displayName'>>;
   createBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationCreateBookArgs, 'title'>>;
@@ -527,7 +534,8 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteBook?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<MutationDeleteBookArgs, 'id'>>;
   logInWithGoogle?: Resolver<Maybe<ResolversTypes['AuthResponse']>, ParentType, ContextType, RequireFields<MutationLogInWithGoogleArgs, 'googleAccessToken'>>;
   removeBookFromUserCollection?: Resolver<Maybe<ResolversTypes['UserCollection']>, ParentType, ContextType, RequireFields<MutationRemoveBookFromUserCollectionArgs, 'bookId'>>;
-  updatePersonalization?: Resolver<Maybe<ResolversTypes['Personalization']>, ParentType, ContextType, Partial<MutationUpdatePersonalizationArgs>>;
+  shareEnhancement?: Resolver<Maybe<ResolversTypes['GenericSuccessResponse']>, ParentType, ContextType, RequireFields<MutationShareEnhancementArgs, 'enhancementId' | 'userId'>>;
+  updatePersonalization?: Resolver<Maybe<ResolversTypes['GenericSuccessResponse']>, ParentType, ContextType, Partial<MutationUpdatePersonalizationArgs>>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
@@ -537,8 +545,8 @@ export type PageInfoResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type PersonalizationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Personalization'] = ResolversParentTypes['Personalization']> = {
-  fontStyle?: Resolver<Maybe<ResolversTypes['ReaderFontPreference']>, ParentType, ContextType>;
   readerFontSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  readerFontStyle?: Resolver<Maybe<ResolversTypes['ReaderFontPreference']>, ParentType, ContextType>;
   themeMode?: Resolver<Maybe<ResolversTypes['ThemeMode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -593,9 +601,9 @@ export type Resolvers<ContextType = any> = {
   AuthorConnection?: AuthorConnectionResolvers<ContextType>;
   Book?: BookResolvers<ContextType>;
   BookConnection?: BookConnectionResolvers<ContextType>;
-  EmailLogInResponse?: EmailLogInResponseResolvers<ContextType>;
   Enhancement?: EnhancementResolvers<ContextType>;
   EnhancementPatch?: EnhancementPatchResolvers<ContextType>;
+  GenericSuccessResponse?: GenericSuccessResponseResolvers<ContextType>;
   Genre?: GenreResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;

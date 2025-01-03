@@ -19,7 +19,7 @@ export const resolvers: Resolvers = {
       const {
         themeMode,
         readerFontSize,
-        readerFontStyle,
+        readerFontStyle
       } = args
 
       if (!user) {
@@ -29,10 +29,10 @@ export const resolvers: Resolvers = {
       const currentPersonalization = user.personalization
 
       const newPersonalization = personalizationSchema.parse({
+        ...currentPersonalization,
         themeMode,
         readerFontSize,
-        readerFontStyle,
-        ...currentPersonalization,
+        readerFontStyle
       })
 
       await prisma.user.update({
@@ -40,7 +40,7 @@ export const resolvers: Resolvers = {
         data: { personalization: newPersonalization },
       })
 
-      return newPersonalization
+      return { success: true }
     }
   }
 }
